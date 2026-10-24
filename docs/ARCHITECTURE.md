@@ -1,4 +1,4 @@
-# BTCS Mining Pool architecture
+# Silver Pool architecture
 
 > **Status: candidate design note.** The scope and decisions in
 > [`README.md`](../README.md) remain authoritative. This document does not

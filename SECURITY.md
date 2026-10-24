@@ -2,9 +2,9 @@
 
 ## Scope
 
-This repository is a **planned development scaffold** for a BTCS L1 mining
-pool. There is no runnable service yet, no production deployment, and no
-authorization for real-value mining or payouts.
+This repository contains the **Silver Pool prototype**. Its pool server and
+Stratum flow have been exercised against a local regtest node, but the project
+has no production deployment or authorization for real-value mining or payouts.
 
 ## Reporting
 
@@ -25,5 +25,5 @@ fix before disclosure.
 
 ## Known limitations
 
-- No implementation, test suite, or audit exists.
-- No threat model has been validated against a running system.
+- The implementation and unit tests have not undergone a security audit.
+- The threat model has not been validated for production use.
