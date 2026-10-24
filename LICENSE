@@ -1,0 +1,18 @@
+Copyright (c) 2026 Silver Labs Technology & Development. All rights reserved.
+
+This repository is published for review, development, and evaluation by Silver
+Labs and its authorized contributors.
+
+No license is granted. No permission is given to copy, modify, distribute,
+sublicense, or use this software or its source code, in whole or in part,
+except as expressly authorized in writing by the copyright holder.
+
+This software is a development prototype. It is provided "as is", without
+warranty of any kind, express or implied, including but not limited to the
+warranties of merchantability, fitness for a particular purpose, and
+non-infringement. The copyright holder is not liable for any claim, damages, or
+other liability arising from the software or its use.
+
+Third-party dependencies remain under their own licenses. See the dependency
+manifests and `README.md` for the dependency inventory. Nothing in this file
+grants rights to third-party material.

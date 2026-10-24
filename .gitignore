@@ -1,12 +1,59 @@
-# No implementation yet. Keep local and generated artifacts out of Git.
+# Secrets and local credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+wallet.dat
+wallet.dat.*
+*-wallet/
+keystore/
+mnemonic*
+seed*
+
+# Local runtime data
+data/
+runtime/
+tmp/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.ldb
+
+# Node.js
 node_modules/
 dist/
 build/
 coverage/
-.env
-.env.*
-!.env.example
-*.log
-.DS_Store
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
 __pycache__/
+*.py[cod]
+.venv/
+venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Rust
+target/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local chain and node state
+.regtest/
+testnet*/
+mainnet/
+blocks/
+chainstate/
