@@ -1,6 +1,6 @@
 /** @type {import('vite').UserConfig} */
 export default {
-  base: '/Silver-Pool/',
+  base: './',
   root: '.',
   publicDir: 'public',
   build: {
@@ -13,5 +13,8 @@ export default {
         entryFileNames: 'assets/[name]-[hash].js',
       },
     },
+  },
+  server: {
+    open: 'index.html',
   },
 }

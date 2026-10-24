@@ -18,6 +18,40 @@ def _to_satoshi(value) -> Decimal:
 def _from_satoshi(satoshis: Decimal) -> Decimal:
     return satoshis / Decimal("100000000")
 
+def calculate_pplns_reward(miner_shares: int, round_total_shares: int, 
+                           coinbase_value: int, pool_fee_percent: float) -> dict:
+    """Calculate PPLNS reward for a miner.
+    
+    
+    Returns dict with:
+    - gross_satoshi: total coinbase value allocated
+    - fee_satoshi: pool fee amount
+    - net_satoshi: reward after fee
+    """
+    if round_total_shares == 0:
+        return {
+            "gross_satoshi": Decimal("0"),
+            "fee_satoshi": Decimal("0"),
+            "net_satoshi": Decimal("0"),
+        }
+    
+    # Calculate miner's share of the reward
+    # Integer-precision arithmetic: (miner_shares * coinbase_value) // round_total_shares
+    gross_satoshi = (Decimal(miner_shares) * Decimal(coinbase_value)) / Decimal(round_total_shares)
+    
+    # Apply pool fee (percentage of gross)
+    fee_percent = Decimal(pool_fee_percent)
+    fee_satoshi = (gross_satoshi * fee_percent / Decimal(100)).quantize(Decimal("1"), rounding=ROUND_DOWN)
+    
+    # Net reward after fee
+    net_satoshi = gross_satoshi - fee_satoshi
+    
+    return {
+        "gross_satoshi": gross_satoshi.quantize(Decimal("1"), rounding=ROUND_DOWN),
+        "fee_satoshi": fee_satoshi,
+        "net_satoshi": net_satoshi.quantize(Decimal("1"), rounding=ROUND_DOWN),
+    }
+
 
 class Accounting:
     def __init__(self, db_path: str):
@@ -43,8 +77,21 @@ class Accounting:
             accepted INTEGER NOT NULL DEFAULT 0,
             difficulty INTEGER NOT NULL DEFAULT 1,
             created_at REAL NOT NULL,
+            round_id TEXT,
             UNIQUE(miner, job_id, nonce)
         );
+        CREATE TABLE IF NOT EXISTS rounds (
+            round_id TEXT PRIMARY KEY NOT NULL,
+            height_start INTEGER NOT NULL DEFAULT 0,
+            height_end INTEGER DEFAULT 0,
+            total_shares INTEGER NOT NULL DEFAULT 0,
+            total_difficulty INTEGER NOT NULL DEFAULT 0,
+            pool_fee_satoshi INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT \"active\",
+            created_at REAL NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_shares_round ON shares(round_id);
+        CREATE INDEX IF NOT EXISTS idx_shares_miner ON shares(miner);
         CREATE TABLE IF NOT EXISTS blocks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             height INTEGER NOT NULL,
@@ -94,6 +141,13 @@ class Accounting:
         """)
         self.conn.commit()
 
+        # Migration: add round_id column to existing shares table if missing
+        try:
+            self.conn.execute("ALTER TABLE shares ADD COLUMN round_id TEXT")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        self.conn.commit()
+
     def register_miner(self, username: str):
         try:
             self.conn.execute(
@@ -107,12 +161,12 @@ class Accounting:
         except sqlite3.IntegrityError:
             pass
 
-    def record_share(self, miner: str, job_id: str, nonce: int, accepted: bool, difficulty: int = 1) -> bool:
+    def record_share(self, miner: str, job_id: str, nonce: int, accepted: bool, difficulty: int = 1, round_id: str | None = None) -> bool:
         try:
             self.conn.execute(
-                """INSERT INTO shares(miner, job_id, nonce, accepted, difficulty, created_at)
-                   VALUES (?,?,?,?,?,?)""",
-                (miner, job_id, nonce, 1 if accepted else 0, difficulty, time.time()),
+                """INSERT INTO shares(miner, job_id, nonce, accepted, difficulty, created_at, round_id)
+                   VALUES (?,?,?,?,?,?,?)""",
+                (miner, job_id, nonce, 1 if accepted else 0, difficulty, time.time(), round_id),
             )
             self.conn.commit()
             return True
@@ -156,7 +210,7 @@ class Accounting:
         if fee_satoshi > 0:
             self.conn.execute(
                 """INSERT INTO pool_fee_ledger(block_height, block_hash, fee_satoshi, allocated_to_address, status, created_at)
-                   VALUES (?,?,?,?,?,?)""",
+                   VALUES (?,?,?,?,?,?,?)""",
                 (height, block_hash, fee_satoshi, "", "pending", time.time()),
             )
 
@@ -290,6 +344,82 @@ class Accounting:
             }
             for row in cur
         ]
+
+    def start_round(self, round_id: str, height_start: int) -> bool:
+        """Start a new PPLNS round."""
+        try:
+            self.conn.execute(
+                "INSERT INTO rounds(round_id, height_start, total_shares, total_difficulty, pool_fee_satoshi, status, created_at) VALUES (?,?,0,0,0,'active',?)",
+                (round_id, height_start, time.time()),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            self.conn.rollback()
+            return False
+
+    def end_round(self, round_id: str, height_end: int, pool_fee_satoshi: int) -> bool:
+        """End a PPLNS round and record its fee."""
+        try:
+            self.conn.execute(
+                "UPDATE rounds SET height_end=?, pool_fee_satoshi=?, status='completed' WHERE round_id=?",
+                (height_end, pool_fee_satoshi, round_id),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            self.conn.rollback()
+            return False
+
+    def get_round(self, round_id: str) -> dict | None:
+        """Get round information by round_id."""
+        row = self.conn.execute(
+            "SELECT round_id, height_start, height_end, total_shares, total_difficulty, pool_fee_satoshi, status, created_at FROM rounds WHERE round_id=?",
+            (round_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return {
+            "round_id": row[0],
+            "height_start": row[1],
+            "height_end": row[2],
+            "total_shares": row[3],
+            "total_difficulty": row[4],
+            "pool_fee_satoshi": row[5],
+            "status": row[6],
+            "created_at": row[7],
+        }
+
+    def update_round_totals(self, round_id: str, shares_added: int, difficulty_added: int) -> bool:
+        """Update cumulative share and difficulty totals for a round."""
+        try:
+            self.conn.execute(
+                "UPDATE rounds SET total_shares = total_shares + ?, total_difficulty = total_difficulty + ? WHERE round_id=?",
+                (shares_added, difficulty_added, round_id),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            self.conn.rollback()
+            return False
+
+    def record_share_round(self, miner: str, job_id: str, nonce: int, accepted: bool, difficulty: int = 1, round_id: str | None = None) -> bool:
+        """Record a share and update round totals if round_id is provided."""
+        if round_id is None:
+            return self.record_share(miner, job_id, nonce, accepted, difficulty)
+        try:
+            self.conn.execute(
+                """INSERT INTO shares(miner, job_id, nonce, accepted, difficulty, created_at, round_id)
+                   VALUES (?,?,?,?,?,?,?)""",
+                (miner, job_id, nonce, 1 if accepted else 0, difficulty, time.time(), round_id),
+            )
+            if accepted:
+                self.update_round_totals(round_id, 1, difficulty)
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            self.conn.rollback()
+            return False
 
     def close(self):
         self.conn.close()

@@ -18,6 +18,7 @@ class StratumServer:
         self.jobs: Dict[str, Dict[str, Any]] = {}
         self.current_job_id: str | None = None
         self.current_template = None
+        self.current_round_id: str | None = None
         self.job_counter = 0
         self.target = 0
         self.difficulty = config.difficulty
@@ -49,6 +50,9 @@ class StratumServer:
                     }
                     self.jobs[job_id] = job
                     self.current_job_id = job_id
+                    # Start a new PPLNS round for this template/height
+                    self.current_round_id = f"round-{tpl['height']}"
+                    self.accounting.start_round(self.current_round_id, tpl["height"])
                     await self.broadcast_job(job, clean=True)
             except Exception as e:
                 print("template poll error", e)
@@ -174,10 +178,10 @@ class StratumServer:
         h = block_hash(header)
         target = self.target
         if int(h, 16) > target:
-            self.accounting.record_share(user, job_id, nonce, False)
+            self.accounting.record_share_round(user, job_id, nonce, False, round_id=self.current_round_id)
             return False
         # accepted share
-        is_dup = not self.accounting.record_share(user, job_id, nonce, True)
+        is_dup = not self.accounting.record_share_round(user, job_id, nonce, True, round_id=self.current_round_id)
         if is_dup:
             return False
         # block-level: submit block
@@ -200,6 +204,14 @@ class StratumServer:
                     user,
                 )
                 self.on_block(tpl["height"], h)
+                # End the PPLNS round when a block is found
+                if self.current_round_id:
+                    self.accounting.end_round(
+                        self.current_round_id,
+                        tpl["height"],
+                        fee_satoshi,
+                    )
+                    self.current_round_id = None
         except Exception as e:
             print("submit error", e)
         return True
