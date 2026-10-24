@@ -185,7 +185,20 @@ class StratumServer:
             res = self.rpc.submitblock(block_bytes.hex())
             print("submitblock result", res)
             if res is None:
-                self.accounting.record_block(tpl["height"], h, user)
+                # Calculate pool fee from coinbase value
+                coinbase_value_satoshi = tpl["coinbasevalue"]
+                fee_percent = self.config.pool_fee
+                # Fee calculated as percentage of coinbase value
+                fee_satoshi = (coinbase_value_satoshi * fee_percent) // 100
+                net_reward_satoshi = coinbase_value_satoshi - fee_satoshi
+                self.accounting.record_block(
+                    tpl["height"],
+                    h,
+                    coinbase_value_satoshi,
+                    fee_satoshi,
+                    net_reward_satoshi,
+                    user,
+                )
                 self.on_block(tpl["height"], h)
         except Exception as e:
             print("submit error", e)
