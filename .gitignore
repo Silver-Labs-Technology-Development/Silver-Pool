@@ -1,0 +1,12 @@
+# No implementation yet. Keep local and generated artifacts out of Git.
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+__pycache__/
+.pytest_cache/
