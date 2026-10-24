@@ -47,7 +47,7 @@ const pageState = {
 
 // API configuration - configurable base URL for deployed environments
 //
-const API_BASE_URL = "http://127.0.0.1:8080"
+const API_BASE_URL = "/api"
 // Fetch data for a specific page
 async function fetchPageData(pageName) {
   switch (pageName) {

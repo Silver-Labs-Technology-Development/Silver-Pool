@@ -1,6 +1,6 @@
 /** @type {import('vite').UserConfig} */
 export default {
-  base: './',
+  base: '/Silver-Pool/',
   root: '.',
   publicDir: 'public',
   build: {
