@@ -1,6 +1,17 @@
-# Secrets and local credentials
+# No implementation yet. Keep local and generated artifacts out of Git.
+node_modules/
+dist/
+build/
+coverage/
 .env
 .env.*
+!.env.example
+*.log
+.DS_Store
+__pycache__/
+.pytest_cache/
+
+# Secrets and local credentials
 *.pem
 *.key
 *.p12
@@ -17,35 +28,22 @@ seed*
 data/
 runtime/
 tmp/
-*.log
 *.sqlite
 *.sqlite3
 *.db
 *.ldb
 
-# Node.js
-node_modules/
-dist/
-build/
-coverage/
+# Tool caches and environments
+.venv/
+venv/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Rust
-target/
-
 # Editors and OS
-.DS_Store
 Thumbs.db
 .idea/
 .vscode/
