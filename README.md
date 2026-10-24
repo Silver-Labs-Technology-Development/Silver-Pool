@@ -90,6 +90,29 @@ submitted → chain height increments (tested on local regtest)
 - License: preserved from original; see `LICENSE`
 - Visibility: public development repository
 
+## Website
+
+The public website is in the `site/` directory. It is a static Vite-based site
+deployed to GitHub Pages at `https://silver-labs-technology-development.github.io/Silver-Pool/`.
+
+### Build and test
+
+```sh
+cd site
+npm ci
+node --test tests/*.test.mjs
+npm run build
+```
+
+The build outputs to `site/_site/`. The Vite base path is set to `/Silver-Pool/`
+for correct asset loading on GitHub Pages.
+
+### Deployment
+
+GitHub Pages deployment is automated via `.github/workflows/pages.yml`. The
+workflow runs on push to `main`, installs dependencies, runs tests, builds the
+frontend, and deploys to GitHub Pages.
+
 ## Repository layout
 
 ```text
@@ -98,19 +121,33 @@ submitted → chain height increments (tested on local regtest)
 ├── LICENSE
 ├── SECURITY.md
 ├── .gitignore
+├── .github/
+│   └── workflows/
+│       └── pages.yml
 ├── docs/
 │   └── ARCHITECTURE.md
-└── src/
-    └── btcs_pool/
-        ├── block.py
-        ├── accounting.py
-        ├── stratum.py
-        ├── rpc.py
-        ├── config.py
-        └── server.py
-tests/
-├── test_block.py
-└── test_accounting.py
+├── src/
+│   └── btcs_pool/
+│       ├── block.py
+│       ├── accounting.py
+│       ├── stratum.py
+│       ├── rpc.py
+│       ├── config.py
+│       └── server.py
+├── tests/
+│   ├── test_block.py
+│   └── test_accounting.py
+└── site/
+    ├── index.html
+    ├── styles.css
+    ├── site.mjs
+    ├── projects.mjs
+    ├── vite.config.js
+    ├── package.json
+    ├── scripts/
+    │   └── serve.mjs
+    └── tests/
+        └── site.test.mjs
 ```
 
 ## Architecture note

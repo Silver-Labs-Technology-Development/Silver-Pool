@@ -1,5 +1,6 @@
 # No implementation yet. Keep local and generated artifacts out of Git.
 node_modules/
+_site/
 dist/
 build/
 coverage/

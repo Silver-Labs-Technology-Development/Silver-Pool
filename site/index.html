@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111315">
+    <meta name="description" content="Silver Pool — Bitcoin Silver mining pool. Open, transparent, and independently operated by Silver Labs Technology & Development.">
+    <title>Silver Pool — Bitcoin Silver Mining Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23d8dadd' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="site.mjs"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#home" aria-label="Silver Pool home">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span class="brand-name">SILVER <span>POOL</span></span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+        <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation">
+          <a href="#home">Home</a>
+          <a href="#mining">Mining</a>
+          <a href="#statistics">Statistics</a>
+          <a href="#workers">Workers</a>
+          <a href="#blocks">Blocks</a>
+          <a href="#fees">Fees</a>
+          <a href="#coins">Coins</a>
+          <a href="#docs">Docs & Status</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="home" class="hero section-pad">
+        <div class="container hero-content">
+          <p class="eyebrow"><span class="status-dot"></span> BITCOIN SILVER MINING POOL</p>
+          <h1>Silver Pool</h1>
+          <p class="hero-copy">A transparent Bitcoin Silver (BTCS) mining pool operated by Silver Labs Technology & Development. Validate blocks, earn rewards, and participate in secured consensus.</p>
+          <div class="hero-actions">
+            <a class="button button-light" href="#mining">Get Started Mining</a>
+            <a class="button button-outline" href="#statistics">View Statistics</a>
+          </div>
+          <p class="hero-note">Developer preview. Not a production financial service.</p>
+        </div>
+      </section>
+
+      <section id="fees" class="fees section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">FEES AND REWARDS</p>
+            <h2>Pool Fees</h2>
+            <p>Silver Pool charges a <strong>2.00%</strong> fee on miner rewards. The fee is configurable by the pool operator within a 0.00% – 5.00% range via the <code>BTCS_POOL_FEE</code> environment variable.</p>
+            <div class="fee-details">
+              <p>Default fee: <strong>2.00%</strong></p>
+              <p>Minimum fee: <strong>0.00%</strong></p>
+              <p>Maximum fee: <strong>5.00%</strong></p>
+              <p>Fee recipient: <code>BTCS_POOL_FEE_ADDRESS</code></p>
+              <p>Minimum payout: <strong>0.01 BTCS</strong></p>
+              <p>Payout check interval: <strong>300 seconds (5 min)</strong></p>
+              <p>Automatic payouts: <strong>disabled</strong> until verified end-to-end</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="statistics" class="statistics section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">NETWORK STATISTICS</p>
+            <h2>Pool Status</h2>
+            <div class="status-grid">
+              <div class="status-card online">
+                <span class="status-dot"></span>
+                <h3>Pool Status</h3>
+                <p>Not connected</p>
+              </div>
+              <div class="status-card degraded">
+                <span class="status-dot"></span>
+                <h3>Network Hashrate</h3>
+                <p>Data unavailable</p>
+              </div>
+              <div class="status-card offline">
+                <span class="status-dot"></span>
+                <h3>Active Miners</h3>
+                <p>0</p>
+              </div>
+            </div>
+            <div class="status-grid">
+              <div class="status-card online">
+                <span class="status-dot"></span>
+                <h3>Pool Shares</h3>
+                <p>0</p>
+              </div>
+              <div class="status-card degraded">
+                <span class="status-dot"></span>
+                <h3>Current Height</h3>
+                <p>Not connected</p>
+              </div>
+              <div class="status-card offline">
+                <span class="status-dot"></span>
+                <h3>Recent Blocks</h3>
+                <p>0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mining" class="mining section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">MINING</p>
+            <h2>How to Mine BTCS</h2>
+            <p>Silver Pool uses the Stratum V1 protocol over TCP. Miners connect with a worker name and mine directly to the pool.</p>
+            <div class="connection-info">
+              <h3>Pool Connection</h3>
+              <p>Stratum endpoint: <code>stratum.silver-pool.example:3456</code></p>
+              <p>User format: <code>WALLET_ADDRESS.WORKER_NAME</code></p>
+              <p class="muted">Replace <code>stratum.silver-pool.example:3456</code> with the actual pool hostname when deployed.</p>
+            </div>
+            <div class="miner-setup">
+              <h3>Miner Configuration</h3>
+              <pre><code># Example for CCMiner/SGminer/BMiner
+SERVER=stratum.silver-pool.example:3456
+USER=btcs1qxyz...worker1
+PASS=x</code></pre>
+              <p>Replace the server address with the deployed pool hostname.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workers" class="workers section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">WORKERS</p>
+            <h2>Connected Workers</h2>
+            <p>Worker data is not yet connected to a live pool backend. When the pool is deployed, worker hashrate, shares, and status will appear here.</p>
+            <div class="status-card offline">
+              <span class="status-dot"></span>
+              <h3>Active Workers</h3>
+              <p>0</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="blocks" class="blocks section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">BLOCKS</p>
+            <h2>Recent Blocks</h2>
+            <p>Block data is not yet connected to a live pool backend. When the pool is deployed, recently found blocks and their rewards will appear here.</p>
+            <div class="status-card offline">
+              <span class="status-dot"></span>
+              <h3>Blocks Found</h3>
+              <p>0</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="coins" class="coins section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">COINS</p>
+            <h2>Supported Coins</h2>
+            <p>Silver Pool mines <strong>Bitcoin Silver (BTCS)</strong>. Additional coin support is planned for future releases.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="docs" class="docs section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">DOCUMENTATION AND STATUS</p>
+            <h2>Project Status</h2>
+            <p>Silver Pool is under active development. The pool backend (Stratum V1, accounting, block templates) is implemented and tested. The public website is a developer preview.</p>
+            <h3>Implemented</h3>
+            <ul>
+              <li>Stratum V1 protocol server</li>
+              <li>Miner authentication and worker management</li>
+              <li>Share validation and difficulty adjustment</li>
+              <li>Block template generation</li>
+              <li>Accounting and reward calculation</li>
+              <li>Fee configuration (0.00% – 5.00%)</li>
+            </ul>
+            <h3>Tested</h3>
+            <ul>
+              <li>4/4 unit tests passing (accounting, block templates)</li>
+              <li>Website tests passing</li>
+            </ul>
+            <h3>In Progress</h3>
+            <ul>
+              <li>End-to-end payout verification</li>
+              <li>Live pool backend integration with website</li>
+              <li>Production deployment</li>
+            </ul>
+            <h3>Known Limitations</h3>
+            <ul>
+              <li>No live pool data connected to website</li>
+              <li>Automatic payouts disabled until verified</li>
+              <li>Pool statistics show placeholder values</li>
+            </ul>
+            <h3>Source</h3>
+            <p><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" target="_blank" rel="noopener noreferrer">GitHub: Silver-Pool</a></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>Silver Pool — Bitcoin Silver Mining Pool. Operated by Silver Labs Technology &amp; Development.</p>
+        <p>Developer preview. Not a production financial service.</p>
+      </div>
+    </footer>
+  </body>
+</html>
