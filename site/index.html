@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#111315">
-    <meta name="description" content="Silver Pool — Bitcoin Silver mining pool. Open, transparent, and independently operated by Silver Labs Technology & Development.">
+    <meta name="description" content="Silver Pool — Bitcoin Silver mining pool. Open, transparent, independently operated by Silver Labs Technology & Development.">
     <title>Silver Pool — Bitcoin Silver Mining Pool</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23d8dadd' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
@@ -65,6 +65,9 @@
               <p>Payout check interval: <strong>300 seconds (5 min)</strong></p>
               <p>Automatic payouts: <strong>disabled</strong> until verified end-to-end</p>
             </div>
+            <div class="pool-fee-info">
+              <!-- Pool fee info will be populated by JavaScript -->
+            </div>
           </div>
         </div>
       </section>
@@ -74,40 +77,62 @@
           <div class="section-heading">
             <p class="eyebrow">NETWORK STATISTICS</p>
             <h2>Pool Status</h2>
-            <div class="status-grid">
-              <div class="status-card online">
-                <span class="status-dot"></span>
-                <h3>Pool Status</h3>
-                <p>Not connected</p>
-              </div>
-              <div class="status-card degraded">
-                <span class="status-dot"></span>
-                <h3>Network Hashrate</h3>
-                <p>Data unavailable</p>
-              </div>
-              <div class="status-card offline">
+            <div class="status-grid" data-stat-grid>
+              <div class="status-card" data-stat="totalMiners">
                 <span class="status-dot"></span>
                 <h3>Active Miners</h3>
                 <p>0</p>
               </div>
-            </div>
-            <div class="status-grid">
-              <div class="status-card online">
+              <div class="status-card" data-stat="totalShares">
                 <span class="status-dot"></span>
-                <h3>Pool Shares</h3>
+                <h3>Total Shares</h3>
                 <p>0</p>
               </div>
-              <div class="status-card degraded">
+              <div class="status-card" data-stat="acceptedShares">
                 <span class="status-dot"></span>
-                <h3>Current Height</h3>
-                <p>Not connected</p>
+                <h3>Accepted Shares</h3>
+                <p>0</p>
               </div>
-              <div class="status-card offline">
+              <div class="status-card" data-stat="totalBlocks">
                 <span class="status-dot"></span>
-                <h3>Recent Blocks</h3>
+                <h3>Blocks Found</h3>
+                <p>0</p>
+              </div>
+              <div class="status-card" data-stat="matureBlocks">
+                <span class="status-dot"></span>
+                <h3>Mature Blocks</h3>
+                <p>0</p>
+              </div>
+              <div class="status-card" data-stat="immatureBlocks">
+                <span class="status-dot"></span>
+                <h3>Immature Blocks</h3>
                 <p>0</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="recent-blocks" class="recent-blocks section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">BLOCKS</p>
+            <h2>Recent Blocks</h2>
+          </div>
+          <div class="recent-blocks-list">
+            <p>Blocks found by the pool will appear here with confirmation status and reward details.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="recent-shares" class="recent-shares section-pad">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">SHARES</p>
+            <h2>Recent Shares</h2>
+          </div>
+          <div class="recent-shares-list">
+            <p>Share data will appear here when the pool backend is connected. Hashrate, shares, and status are shown in real time.</p>
           </div>
         </div>
       </section>
@@ -141,11 +166,9 @@ PASS=x</code></pre>
           <div class="section-heading">
             <p class="eyebrow">WORKERS</p>
             <h2>Connected Workers</h2>
-            <p>Worker data is not yet connected to a live pool backend. When the pool is deployed, worker hashrate, shares, and status will appear here.</p>
-            <div class="status-card offline">
-              <span class="status-dot"></span>
-              <h3>Active Workers</h3>
-              <p>0</p>
+            <p>Worker data will appear here when the pool backend is connected. Hashrate, shares, and status are shown in real time.</p>
+            <div class="miner-status-grid">
+              <!-- Miner statuses will be populated by JavaScript -->
             </div>
           </div>
         </div>
@@ -156,7 +179,7 @@ PASS=x</code></pre>
           <div class="section-heading">
             <p class="eyebrow">BLOCKS</p>
             <h2>Recent Blocks</h2>
-            <p>Block data is not yet connected to a live pool backend. When the pool is deployed, recently found blocks and their rewards will appear here.</p>
+            <p>Blocks found by the pool will appear here with confirmation status and reward details.</p>
             <div class="status-card offline">
               <span class="status-dot"></span>
               <h3>Blocks Found</h3>
