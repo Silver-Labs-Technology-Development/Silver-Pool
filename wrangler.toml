@@ -1,0 +1,15 @@
+# Silver Pool — Cloudflare Pages configuration
+# Deploys the static website (site/_site) to Cloudflare Pages.
+# The Python pool API backend (pool_api_server.py) runs separately;
+# Cloudflare Pages only serves static assets.
+
+name = "silver-pool"
+compatibility_date = "2026-10-24"
+
+[pages]
+pages_dir = "site/_site"
+build_command = "cd site && npm ci && npm run build"
+build_filter = ["site/**"]
+
+[vars]
+API_BASE_URL = "/api"
