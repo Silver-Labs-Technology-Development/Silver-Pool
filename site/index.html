@@ -24,14 +24,13 @@
           <span aria-hidden="true"></span><span aria-hidden="true"></span>
         </button>
         <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation">
-          <a href="#home">Home</a>
-          <a href="#mining">Mining</a>
-          <a href="#statistics">Statistics</a>
-          <a href="#workers">Workers</a>
-          <a href="#blocks">Blocks</a>
-          <a href="#fees">Fees</a>
-          <a href="#coins">Coins</a>
-          <a href="#docs">Docs & Status</a>
+          <a href="/" data-page="overview">Home</a>
+          <a href="/statistics" data-page="statistics">Statistics</a>
+          <a href="/miners" data-page="miners">Miners</a>
+          <a href="/blocks" data-page="blocks">Blocks</a>
+          <a href="/pool" data-page="pool">Pool</a>
+          <a href="/api-docs" data-page="api-docs">API Docs</a>
+          <a href="/status" data-page="status">Status</a>
         </nav>
       </div>
     </header>
@@ -43,8 +42,8 @@
           <h1>Silver Pool</h1>
           <p class="hero-copy">A transparent Bitcoin Silver (BTCS) mining pool operated by Silver Labs Technology & Development. Validate blocks, earn rewards, and participate in secured consensus.</p>
           <div class="hero-actions">
-            <a class="button button-light" href="#mining">Get Started Mining</a>
-            <a class="button button-outline" href="#statistics">View Statistics</a>
+            <a class="button button-light" href="/getting-started">Get Started Mining</a>
+            <a class="button button-outline" href="/statistics">View Statistics</a>
           </div>
           <p class="hero-note">Developer preview. Not a production financial service.</p>
         </div>
@@ -236,6 +235,19 @@ PASS=x</code></pre>
           </div>
         </div>
       </section>
+
+      <!-- SPA page containers for client-side routing -->
+      <section id="page-overview" class="hidden"></section>
+      <section id="page-statistics" class="hidden"></section>
+      <section id="page-miners" class="hidden"></section>
+      <section id="page-miner" class="hidden"></section>
+      <section id="page-blocks" class="hidden"></section>
+      <section id="page-getting-started" class="hidden"></section>
+      <section id="page-pool" class="hidden"></section>
+      <section id="page-api-docs" class="hidden"></section>
+      <section id="page-status" class="hidden"></section>
+      <section id="page-help" class="hidden"></section>
+
     </main>
 
     <footer class="site-footer">

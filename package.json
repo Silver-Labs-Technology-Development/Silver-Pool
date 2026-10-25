@@ -1,0 +1,13 @@
+{
+  "name": "silver-pool",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Silver Pool — Bitcoin Silver mining pool",
+  "scripts": {
+    "build": "cd site && npm ci && npm run build",
+    "deploy": "wrangler pages deploy site/_site --project-name silver-pool"
+  },
+  "devDependencies": {
+    "wrangler": "^4.152.0"
+  }
+}

@@ -3,13 +3,14 @@ import json
 import sqlite3
 import sys
 import time
+import os
 from pathlib import Path
 from decimal import Decimal
 
 sys.path.insert(0, 'src')
 from btcs_pool.accounting import Accounting, _from_satoshi, _to_satoshi
 
-POOL_DB = Path('data/pool.sqlite3')
+POOL_DB = Path(os.getenv('BTCS_POOL_DB', str(Path(__file__).parent / 'data' / 'pool.sqlite3')))
 
 async def get_pool_status():
     """Get overall pool status from the accounting database."""
