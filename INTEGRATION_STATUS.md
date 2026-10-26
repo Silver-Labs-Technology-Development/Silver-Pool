@@ -11,6 +11,16 @@ Pages, but the pool backend has **not** been deployed to a cloud host or
 verified as a testnet, regtest-hosted, or mainnet public pool. Payouts are
 disabled.
 
+### Coin Support Status
+
+- **Bitcoin Silver (BTCS):** Verified implementation on regtest network — the pool
+  runs a real BTCS Core node, Stratum server, and API with full share accounting
+  and block submission handling.
+- **Other coins:** "Integration not yet available" — BTCS is the initial and primary
+  supported coin. Silver Pool is designed as a multi-coin platform, but each
+  additional coin requires its own verified protocol, node integration, algorithms,
+  accounting rules, and operational tests before it can be advertised as supported.
+
 ## Verified locally and in CI
 
 | Area | Evidence |

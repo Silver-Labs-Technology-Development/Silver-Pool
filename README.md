@@ -1,5 +1,20 @@
 # Silver Pool
 
+## Multi-Coin Positioning
+
+**Headline:**\
+"Mine Bitcoin Silver. See Every Share."
+
+**Description:**\
+"Silver Pool is Silver Labs' mining-pool platform, beginning with Bitcoin Silver (BTCS) and designed to support additional coins and mining algorithms as their integrations become available. Track verified shares, pool activity and block outcomes with transparent operational reporting."
+
+**Short version for navigation and metadata:**\
+"Silver Pool — Multi-Coin Mining Infrastructure"
+
+Capability indicator:
+- Bitcoin Silver (BTCS): verified implementation on regtest network
+- Other coins: "Planned" or "Integration not yet available" until their complete integration is tested.
+
 Silver Pool is a Bitcoin Silver (BTCS) SHA256d mining pool. It runs a Stratum V1
 listener and a read-only HTTP API in one Python process, persists accounting in
 SQLite, serves a ten-page static website, and ships a Docker Compose stack that
