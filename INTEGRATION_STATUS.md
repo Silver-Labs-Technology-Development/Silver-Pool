@@ -21,6 +21,37 @@ disabled.
   additional coin requires its own verified protocol, node integration, algorithms,
   accounting rules, and operational tests before it can be advertised as supported.
 
+### Pool Fee Model (documented for future PoW-S design)
+
+**Total pool fee: 2.0%**
+
+- **0.5%** — Silver Labs development allocation. Covers ongoing development, maintenance, and operational costs of the pool.
+- **1.5%** — Planned PoW-staking rewards allocation. Intended for distribution among eligible stakers in proportion to their eligible stake. **Not yet active** — no staking payouts, claim distribution, or live balances are operational. This allocation is documented for future PoW-S design and SilvEx fee integration.
+
+#### Fee arithmetic
+
+- Fee basis is explicitly defined as a percentage point value of the block reward (coinbase value + transaction fees), calculated per round using exact `Decimal` arithmetic with `ROUND_DOWN` rounding.
+- The `BTCS_POOL_FEE` environment variable (default `2.0`) represents the total pool fee in percentage points.
+- Internal accounting uses `Decimal` values to avoid floating-point rounding that can misallocate funds.
+- Rounding and remainder handling are deterministic: `fee_satoshi = (gross_satoshi * pool_fee_percent / 100).quantize(1, rounding=ROUND_DOWN)`.
+
+#### How the future staking share would work
+
+When the PoW-staking allocation becomes active, the 1.5% pool fee will be divided among eligible stakers proportionally to their eligible stake:
+
+```
+staker share_i = 1.5% × eligible_stake_i / total_eligible_stake
+```
+
+- With only one eligible staker, that staker receives 100% of the designated 1.5% allocation for the applicable reward period.
+- As eligible stake changes, each participant's proportion changes.
+- Reward eligibility, stake snapshots, reward periods, lockups, minimums, slashing or penalties, withdrawals, rounding and claim rules remain subject to PoW-S design decisions.
+- The 0.5% development allocation remains distinct from the staking allocation.
+
+#### SilvEx connection (future)
+
+Eligible SilvEx trading-fee revenue attributable to defined BTCS markets may contribute to the PoW-staking reward pool. The exact SilvEx contribution, fee-source accounting, conversion method, and settlement process are to be defined in the PoW-S specification. Implementation will remain separate from the current pool fee path until the specification is approved.
+
 ## Verified locally and in CI
 
 | Area | Evidence |

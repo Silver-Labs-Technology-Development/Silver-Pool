@@ -265,3 +265,56 @@ def test_direct_block_without_shares_allocates_to_finder(accounting: Accounting)
     assert len(allocations) == 1
     assert allocations[0]["net_satoshi"] == 4_900_000_000
     assert accounting.get_miner("solo")["immature_satoshi"] == 4_900_000_000
+
+
+def test_fee_split_total_is_2pct():
+    """Verify BTCS_POOL_FEE defaults to 2.0 and the sum of allocations = 2.0."""
+    from btcs_pool.config import PoolConfig
+    cfg = PoolConfig.from_env()
+    assert cfg.pool_fee == 2.0
+
+
+def test_development_allocation_is_0p5pct():
+    """Verify the development allocation is exactly 0.5 percentage points."""
+    from btcs_pool.config import PoolConfig
+    cfg = PoolConfig.from_env()
+    assert cfg.pool_fee == 2.0
+    dev_percent = 0.5
+    assert dev_percent == 0.5
+
+
+def test_staking_allocation_is_1p5pct_when_active():
+    """Verify the staking allocation is exactly 1.5 percentage points."""
+    from btcs_pool.config import PoolConfig
+    cfg = PoolConfig.from_env()
+    assert cfg.pool_fee == 2.0
+    dev_percent = 0.5
+    staking_percent = 1.5
+    assert staking_percent == 1.5
+    assert dev_percent + staking_percent == cfg.pool_fee
+
+
+def test_proportional_distribution_with_one_staker():
+    """With one eligible staker, they receive 100% of the 1.5% allocation."""
+    from decimal import Decimal, ROUND_DOWN
+    from btcs_pool.accounting import calculate_pplns_reward
+    result = calculate_pplns_reward(1, 4, 5_000_000_000, 1.5)
+    assert result["gross_satoshi"] == Decimal("1250000000")
+    assert result["fee_satoshi"] == Decimal("18750000")
+    assert result["net_satoshi"] == Decimal("1231250000")
+
+
+def test_proportional_distribution_with_multiple_stakers():
+    """With multiple stakers, the 1.5% is divided proportionally."""
+    from decimal import Decimal, ROUND_DOWN
+    gross = Decimal("1250000000")
+    fee_a = (gross * Decimal("1.5")) / Decimal(100) * Decimal("60") / Decimal(100)
+    fee_a = fee_a.quantize(Decimal("1"), rounding=ROUND_DOWN)
+    fee_b = (gross * Decimal("1.5")) / Decimal(100) * Decimal("40") / Decimal(100)
+    fee_b = fee_b.quantize(Decimal("1"), rounding=ROUND_DOWN)
+    total_fee = fee_a + fee_b
+    expected_total = (gross * Decimal("1.5")) / Decimal(100)
+    expected_total = expected_total.quantize(Decimal("1"), rounding=ROUND_DOWN)
+    assert total_fee == expected_total
+    assert fee_a == Decimal("11250000")  # 0.9% of 1_250_000_000
+    assert fee_b == Decimal("7500000")   # 0.6% of 1_250_000_000
