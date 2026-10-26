@@ -12,13 +12,15 @@
 | Verified stage | Local regtest prototype |
 | Real node used | Bitcoin Silver Core `v31.1.3` |
 | Production / mainnet | **No** |
-| Public deployment | **No** |
+| Pool backend deployment | **No** |
+| Static frontend deployment | GitHub Pages (verified) |
 | Payouts | **Disabled** |
 | Repository | `https://github.com/Silver-Labs-Technology-Development/Silver-Pool` |
 
-The verification below was performed on this machine against a throwaway
-regtest datadir. It is not evidence of cloud, testnet, regtest-hosted, or
-mainnet operation.
+The pool verification below was performed on this machine against a throwaway
+regtest datadir. It is not evidence of cloud-hosted, testnet, regtest-hosted, or
+mainnet pool operation. The static website is deployed separately to GitHub
+Pages and has no API, Stratum or node behind it.
 
 ## Implemented backend
 
@@ -189,6 +191,21 @@ SILVER_POOL_SITE_ADDRESS=pool.invalid docker compose --env-file .env.example \
 
 Both pass. This validates interpolation and schema, not container runtime.
 
+### CI and static hosting
+
+- GitHub Actions CI run
+  [`40299896414`](https://github.com/Silver-Labs-Technology-Development/Silver-Pool/actions/runs/40299896414)
+  passed for commit `a8f0071`: Python tests, static site tests, browser tests,
+  production build and both Compose config validations.
+- GitHub Pages run
+  [`40300316286`](https://github.com/Silver-Labs-Technology-Development/Silver-Pool/actions/runs/40300316286)
+  built with `SITE_BASE=/Silver-Pool/` and deployed successfully.
+- Live URL: <https://silver-labs-technology-development.github.io/Silver-Pool/>.
+  All ten routes returned HTTP 200 with the expected page titles, and the
+  hashed JS/CSS assets returned HTTP 200. Because Pages cannot run the backend,
+  the live site requests `/api` from the Pages origin, receives no API, and
+  renders the same explicit offline states covered by the browser suite.
+
 ## Deployment state
 
 The Compose stack is complete in the repository:
@@ -203,21 +220,24 @@ The Compose stack is complete in the repository:
   redirects, TLS overlay
 - `.env.example` with placeholders only; payouts disabled
 
-No image was built or started here. The Docker socket is `root:docker`, the
-current user is not in the `docker` group, and `sudo` requires a password.
+No Compose image was built or started here. The Docker socket is `root:docker`,
+the current user is not in the `docker` group, and `sudo` requires a password.
 Caddy is not installed; the package download timed out and the partial `.deb`
 could not be extracted. Therefore container startup, healthchecks, volume
 permissions, RPC connectivity from the pool container, Caddy routing and TLS
 remain unverified.
 
+The static frontend, by contrast, is deployed and verified on GitHub Pages. That
+is a static-only deployment: it has no pool backend, database, API or Stratum
+listener. The site therefore shows offline states rather than live pool data.
+
 ## Not implemented / blockers
 
 | Item | State |
 |---|---|
-| Live cloud deployment | Blocked: no provider credentials, host, DNS or firewall access |
+| Live pool backend deployment | Blocked: no provider credentials, host, DNS or firewall access |
 | Public Stratum endpoint | Blocked: no public host/port; `BTCS_PUBLIC_STRATUM_HOST` unset |
 | Mainnet pool | Blocked: no mainnet node, funding, operations or public infrastructure |
-| GitHub Pages live URL | Not verified; workflow configured but not run here. Static-only; no API/Stratum |
 | Docker build/runtime | Blocked by socket permissions |
 | Caddy runtime | Blocked: Caddy unavailable |
 | Payouts | Disabled by design; signing/broadcast/confirmation/recovery not implemented |

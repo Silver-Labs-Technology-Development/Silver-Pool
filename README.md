@@ -11,10 +11,15 @@ runs BTCS Core, the pool and Caddy.
 > The complete Stratum → share → block → `submitblock` flow has been verified
 > locally against a real Bitcoin Silver Core `v31.1.3` regtest node. A real
 > block was accepted and persisted; after shutdown, a reopened database still
-> contained the accepted block and the rejected stale share. No cloud host, public DNS name, public Stratum endpoint or mainnet node has
-> been provisioned or verified. The Compose files validate, but the images could
-> not be built in this environment because the Docker daemon socket is not
-> accessible to the current user. See
+> contained the accepted block and the rejected stale share.
+>
+> The static frontend is deployed to GitHub Pages at
+> <https://silver-labs-technology-development.github.io/Silver-Pool/>. That host
+> serves no API or Stratum service, so the live site shows explicit offline
+> states. No cloud host for the pool backend, public Stratum endpoint, public
+> DNS name for the API, or mainnet node has been provisioned or verified. The
+> Compose files validate, but the images could not be built in this environment
+> because the Docker daemon socket is not accessible to the current user. See
 > [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md) for the full
 > evidence and blockers.
 
@@ -250,11 +255,13 @@ Caddyfile has not been runtime-validated. See
 [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md) for the exact
 blockers.
 
-GitHub Pages can host only the static frontend. It has no API or Stratum
-service; without a same-origin `/api` reverse proxy the deployed site will show
-honest offline states. The Pages workflow builds with `SITE_BASE=/Silver-Pool/`
-and runs the static and browser tests, but no workflow run or live Pages
-deployment has been verified from this environment.
+GitHub Pages hosts only the static frontend. It has no API or Stratum service;
+without a same-origin `/api` reverse proxy the deployed site shows explicit
+offline states. The Pages workflow builds with `SITE_BASE=/Silver-Pool/`, runs
+the static and browser tests, and deploys successfully to
+<https://silver-labs-technology-development.github.io/Silver-Pool/>. The live
+deployment was verified by loading all ten routes and the built JS/CSS assets
+over HTTPS; the pool backend is not deployed there.
 
 ## Tests
 
@@ -294,8 +301,9 @@ results are recorded in
 
 ## Known limitations
 
-- **No live deployment.** No cloud credentials, DNS, firewall or public
-  Stratum TCP endpoint has been provisioned or verified.
+- **No live pool backend deployment.** The static frontend is live on GitHub
+  Pages, but no cloud host, DNS, firewall or public Stratum TCP endpoint for the
+  node/pool/API stack has been provisioned or verified.
 - **No mainnet operation.** The verified chain is a temporary local regtest
   node. Mainnet would additionally require operational review, monitoring,
   backups and a public endpoint.

@@ -9,8 +9,9 @@
 > classifications and deployment claims are no longer current. It is retained
 > for provenance only. In particular: the backend now uses migrations and a
 > real-node E2E, the API has a consistent envelope and 17 routes, the site has
-> ten real pages, and a three-service Compose stack exists. No live deployment
-> has been verified.
+> ten real pages, and a three-service Compose stack exists. The static frontend
+> is now deployed to GitHub Pages; no live pool backend deployment has been
+> verified.
 
 ## 1. Repository Facts
 - **Root**: `/home/user/Silver-Labs/Silver-Pool/`

@@ -78,14 +78,17 @@ item was exercised locally, not that production infrastructure exists.
       are defined.
 - [x] Pool and web images are configured to run non-root; node capabilities are
       dropped.
+- [x] Static frontend deploys to GitHub Pages with `SITE_BASE=/Silver-Pool/`;
+      all ten live routes and assets return HTTP 200.
 - [ ] Images build successfully. Blocked: Docker socket permission.
 - [ ] Containers start and pass healthchecks. Blocked: Docker socket
       permission.
 - [ ] Caddyfile validates and serves routes/TLS. Blocked: Caddy unavailable.
 - [ ] A public Stratum endpoint resolves and accepts TCP connections. Blocked:
       no host/DNS/firewall access.
-- [ ] Live cloud deployment exists. Blocked: no credentials or infrastructure.
-- [ ] Rollback procedure exercised. Not possible without a deployment.
+- [ ] Live pool backend deployment exists. Blocked: no credentials or
+      infrastructure for the node/pool/API stack. GitHub Pages is static-only.
+- [ ] Rollback procedure exercised. Not possible without a backend deployment.
 - [ ] Backups and restore drill for the pool database and node data. Not
       exercised.
 
@@ -107,12 +110,14 @@ item was exercised locally, not that production infrastructure exists.
 | `python3 -m pytest -q tests` | **100 passed** in 34.85s, including real-node E2E |
 | `cd site && npm test` | **8 passed** |
 | `cd site && npm run test:browser` | **7 passed** |
-| `cd site && npm run build` | all ten routes built |
+| `cd site && npm run build` | all ten routes built for `/` and `/Silver-Pool/` |
+| GitHub Actions CI | **passed** (run `40299896414`) |
+| GitHub Pages static deployment | **passed** (run `40300316286`); 10 live routes and assets HTTP 200 |
 | Base `docker compose config` | passed |
 | Production overlay `docker compose config` | passed |
 | Docker image build/run | **blocked** (socket permission) |
 | Caddy runtime validation | **blocked** (Caddy unavailable) |
-| Public deployment / DNS / TLS | **not performed** |
+| Public pool backend deployment / DNS / TLS | **not performed** |
 | Payout signing/broadcast/recovery | **not implemented** |
 
 ## Economics disclosed by the implementation
@@ -127,7 +132,7 @@ item was exercised locally, not that production infrastructure exists.
 
 ## Decision
 
-**Do not release as a paying, public or mainnet pool.** The minimum remaining
-work is a real third-party miner test, an external deployment with runtime
-healthchecks and TLS, a public Stratum endpoint, payout implementation and
-security review.
+**Do not release as a paying, public or mainnet pool.** Only the static frontend
+is deployed (GitHub Pages). The minimum remaining work is a real third-party
+miner test, a pool backend deployment with runtime healthchecks and TLS, a
+public Stratum endpoint, payout implementation and security review.

@@ -197,6 +197,10 @@ implementation with pools that use a sliding PPLNS window.
   rotation and `no-new-privileges`.
 - The production overlay adds Caddy automatic TLS and publishes 80/443; it
   requires `SILVER_POOL_SITE_ADDRESS`.
+- GitHub Pages separately hosts the static frontend only at
+  <https://silver-labs-technology-development.github.io/Silver-Pool/>. It is not
+  part of this Compose topology and cannot reach the pool API or Stratum
+  listener, so the live static site shows offline states.
 
 ## Failure behavior
 

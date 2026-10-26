@@ -68,7 +68,9 @@ resulting `.env` out of Git.
 ## Known limitations
 
 - No independent security audit or production threat-model review.
-- No live deployment, public endpoint, DNS, TLS or firewall verification.
+- No live pool backend deployment, public API endpoint, Stratum endpoint, DNS,
+  TLS or firewall verification. Only the static frontend is deployed to GitHub
+  Pages.
 - Docker images and the Caddyfile have not been runtime-validated in this
   environment.
 - SQLite is a single-node store; there is no HA or multi-writer design.
@@ -76,8 +78,8 @@ resulting `.env` out of Git.
 - No vardiff; difficulty is static per session unless a miner suggests a value.
 - No payout implementation.
 - No tested backup/restore or disaster-recovery procedure.
-- The static GitHub Pages site cannot host the API or Stratum; without a
-  same-origin proxy it intentionally shows offline states.
+- The deployed static GitHub Pages site cannot host the API or Stratum; without
+  a same-origin proxy it intentionally shows offline states.
 
 ## Safe development practice
 

@@ -6,11 +6,12 @@
 
 **Local regtest prototype.** A real Bitcoin Silver Core `v31.1.3` regtest node,
 the integrated Stratum/API process and the persistent SQLite database were
-exercised end to end on this machine. This repository has **not** been deployed
-to a cloud host or verified as a testnet, regtest-hosted, or mainnet public pool.
-Payouts are disabled.
+exercised end to end on this machine. The static frontend is deployed to GitHub
+Pages, but the pool backend has **not** been deployed to a cloud host or
+verified as a testnet, regtest-hosted, or mainnet public pool. Payouts are
+disabled.
 
-## Verified locally
+## Verified locally and in CI
 
 | Area | Evidence |
 |---|---|
@@ -23,8 +24,10 @@ Payouts are disabled.
 | Persistence | New `Database` instance after shutdown still sees the accepted block and rejected stale share |
 | API | Envelopes, request IDs, CORS, rate limiting with trusted-proxy handling, validation, 404/405/500, health/readiness, OpenAPI |
 | Website | Ten direct-load routes, titles/headings/nav, live values, miner search, back/forward/reload, mobile menu, API-error states |
-| Build | Vite production build emits all ten routes and hashed assets |
+| Build | Vite production build emits all ten routes and hashed assets, for root and `/Silver-Pool/` bases |
 | Deployment files | Base and production Compose configurations pass `docker compose config`; pinned BTCS release SHA256 is checked |
+| CI | GitHub Actions CI run `40299896414` passed for commit `a8f0071` |
+| Static deployment | GitHub Pages run `40300316286` passed; all ten live routes and assets return HTTP 200 at <https://silver-labs-technology-development.github.io/Silver-Pool/> |
 
 The last full Python run was **100 passed** (including the real-node E2E).
 The static website suite was **8 passed** and the Chrome/CDP browser suite was
@@ -37,10 +40,9 @@ The static website suite was **8 passed** and the Chrome/CDP browser suite was
 |---|---|
 | Docker image build and container runtime | The Docker socket is owned by `root:docker`; the current user is not in the `docker` group and `sudo` requires a password. Compose config validation only. |
 | Caddyfile runtime validation | Caddy is not installed; the apt package download timed out/incomplete. |
-| Live cloud deployment | No provider credentials, host, DNS or firewall access. |
+| Live pool backend deployment | No provider credentials, host, DNS or firewall access for the node/pool/API stack. GitHub Pages cannot run it. |
 | Public Stratum endpoint | `BTCS_PUBLIC_STRATUM_HOST` is unset; no externally reachable TCP endpoint exists. |
 | Mainnet pool | No mainnet node, funding, operational review or public infrastructure. |
-| GitHub Pages deployment | Workflow is configured but no Actions run or live Pages URL was verified. Pages is static-only and cannot host the API or Stratum. |
 | Payouts | Signing, broadcasting, confirmation policy, operator authorization and recovery are not implemented. |
 
 ## Reproduce the verification
