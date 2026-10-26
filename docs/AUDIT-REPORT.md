@@ -1,6 +1,17 @@
 # Silver Pool Full Product Audit Report
 ## Date: 2026-10-24
 
+> **Historical snapshot — superseded by
+> [`docs/IMPLEMENTATION-STATUS.md`](IMPLEMENTATION-STATUS.md) (2026-10-26).**
+>
+> This audit describes the repository before the current implementation pass.
+> Its test counts, endpoint list, single-page website findings, “missing”
+> classifications and deployment claims are no longer current. It is retained
+> for provenance only. In particular: the backend now uses migrations and a
+> real-node E2E, the API has a consistent envelope and 17 routes, the site has
+> ten real pages, and a three-service Compose stack exists. No live deployment
+> has been verified.
+
 ## 1. Repository Facts
 - **Root**: `/home/user/Silver-Labs/Silver-Pool/`
 - **Branch**: `main` (up to date with `origin/main`)

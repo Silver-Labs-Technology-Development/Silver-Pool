@@ -1,0 +1,52 @@
+# Repository metadata
+.git
+.gitignore
+.github
+.wrangler
+node_modules
+site/node_modules
+site/_site
+site/tests
+__pycache__
+.pytest_cache
+*.pyc
+*.pyo
+
+# Local runtime data, secrets and logs
+.env
+.env.*
+!.env.example
+data
+runtime
+tmp
+*.sqlite
+*.sqlite3
+*.db
+*.log
+secrets
+*.pem
+*.key
+*.p12
+*.pfx
+wallet.dat
+wallet.dat.*
+*-wallet
+keystore
+
+# Local chain state
+.regtest
+testnet*
+mainnet
+blocks
+chainstate
+
+# Docs and tests are not needed in runtime images
+tests
+docs
+README.md
+INTEGRATION_STATUS.md
+RELEASE_CHECKLIST.md
+SECURITY.md
+LICENSE
+pytest.ini
+requirements-dev.txt

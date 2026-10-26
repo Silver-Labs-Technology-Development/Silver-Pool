@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool HTTP API — live endpoint index, response envelope, rate limits and OpenAPI document.">
+    <title>API Documentation — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/api-docs.js"></script>
+  </head>
+  <body data-page="api-docs">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+        <a href="../" data-page="overview">Overview</a><a href="../statistics/" data-page="statistics">Statistics</a><a href="../miners/" data-page="miners">Miners</a><a href="../blocks/" data-page="blocks">Blocks</a><a href="../getting-started/" data-page="getting-started">Getting Started</a><a href="../pool/" data-page="pool">Pool</a><a href="../api-docs/" data-page="api-docs">API</a><a href="../status/" data-page="status">Status</a><a href="../help/" data-page="help">Help</a>
+      </nav>
+    </div></header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">API DOCUMENTATION</p><h1>Read-only pool API</h1><p>The Silver Pool API is public, unauthenticated and rate-limited. Endpoint descriptions below are loaded from the running API, so the page cannot silently advertise a route the backend does not serve.</p></div></section>
+      <section class="section">
+        <div class="container">
+          <div id="api-state" aria-live="polite"></div>
+          <div class="two-col" style="margin-bottom:1.5rem">
+            <article class="panel"><h2>Base URL</h2><div class="copy-row" style="margin-bottom:1rem"><code id="api-base" class="mono">—</code><button class="button button-dark button-small" type="button" data-copy-target="api-base">Copy</button></div><dl class="definition-list">
+              <div class="row"><dt>Authentication</dt><dd id="api-auth">None</dd></div>
+              <div class="row"><dt>Rate limit</dt><dd id="api-rate">—</dd></div>
+              <div class="row"><dt>Response format</dt><dd>JSON envelope</dd></div>
+              <div class="row"><dt>OpenAPI</dt><dd><a id="openapi-link" href="../api/openapi.json">OpenAPI 3.0 document</a></dd></div>
+            </dl></article>
+            <article class="panel"><h2>Response envelope</h2><p class="muted">Success and error responses use the same top-level shape.</p><pre><code id="envelope-example">{
+  "ok": true,
+  "data": { },
+  "meta": { "timestamp": 0, "request_id": "..." }
+}</code></pre><p class="muted">Errors use <code>"ok": false</code> and an <code>error</code> object with <code>code</code>, <code>message</code> and optional <code>details</code>.</p></article>
+          </div>
+
+          <h2>Endpoint index</h2>
+          <p class="muted" id="api-endpoint-count">Waiting for the API…</p>
+          <div class="table-wrap" style="margin-bottom:1.5rem"><table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody id="api-endpoints-body"><tr><td colspan="3" class="table-empty">Waiting for endpoint index…</td></tr></tbody>
+          </table></div>
+
+          <div class="panel"><h2>Quick check</h2><p>Verify that the API is alive and the database is reachable.</p><div class="copy-row"><pre style="flex:1 1 420px;margin:0"><code id="curl-example">curl -sS …/api/health</code></pre><button class="button button-outline button-small" type="button" data-copy-target="curl-example" style="color:var(--ink);border-color:var(--line)">Copy</button></div></div>
+
+          <div class="callout" style="margin-top:1.5rem"><p><strong>No secrets in this API.</strong> It does not expose RPC URLs, RPC credentials, wallet private material, payout addresses or signing controls. Blocks and miners are public pool records.</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

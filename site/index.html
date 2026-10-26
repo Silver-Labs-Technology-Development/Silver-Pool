@@ -3,257 +3,194 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111315">
-    <meta name="description" content="Silver Pool — Bitcoin Silver mining pool. Open, transparent, independently operated by Silver Labs Technology & Development.">
-    <title>Silver Pool — Bitcoin Silver Mining Pool</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23d8dadd' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="styles.css">
-    <script type="module" src="site.mjs"></script>
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool — a Bitcoin Silver (BTCS) SHA256d mining pool with live, verifiable pool statistics and Stratum V1 access.">
+    <title>Overview — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./assets/overview.js"></script>
   </head>
-  <body>
+  <body data-page="overview">
     <a class="skip-link" href="#main">Skip to content</a>
-
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="#home" aria-label="Silver Pool home">
+        <a class="brand" href="./" aria-label="Silver Pool home">
           <span class="brand-mark" aria-hidden="true">S</span>
           <span class="brand-name">SILVER <span>POOL</span></span>
         </a>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle>
           <span class="sr-only">Toggle navigation</span>
           <span aria-hidden="true"></span><span aria-hidden="true"></span>
         </button>
-        <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation">
-          <a href="/" data-page="overview">Home</a>
-          <a href="/statistics" data-page="statistics">Statistics</a>
-          <a href="/miners" data-page="miners">Miners</a>
-          <a href="/blocks" data-page="blocks">Blocks</a>
-          <a href="/pool" data-page="pool">Pool</a>
-          <a href="/api-docs" data-page="api-docs">API Docs</a>
-          <a href="/status" data-page="status">Status</a>
+        <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+          <a href="./" data-page="overview">Overview</a>
+          <a href="statistics/" data-page="statistics">Statistics</a>
+          <a href="miners/" data-page="miners">Miners</a>
+          <a href="blocks/" data-page="blocks">Blocks</a>
+          <a href="getting-started/" data-page="getting-started">Getting Started</a>
+          <a href="pool/" data-page="pool">Pool</a>
+          <a href="api-docs/" data-page="api-docs">API</a>
+          <a href="status/" data-page="status">Status</a>
+          <a href="help/" data-page="help">Help</a>
         </nav>
       </div>
     </header>
 
     <main id="main">
-      <section id="home" class="hero section-pad">
-        <div class="container hero-content">
-          <p class="eyebrow"><span class="status-dot"></span> BITCOIN SILVER MINING POOL</p>
-          <h1>Silver Pool</h1>
-          <p class="hero-copy">A transparent Bitcoin Silver (BTCS) mining pool operated by Silver Labs Technology & Development. Validate blocks, earn rewards, and participate in secured consensus.</p>
-          <div class="hero-actions">
-            <a class="button button-light" href="/getting-started">Get Started Mining</a>
-            <a class="button button-outline" href="/statistics">View Statistics</a>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow"><span class="dot dot-unknown" id="hero-dot"></span> BITCOIN SILVER MINING POOL</p>
+            <h1>Mine Bitcoin Silver. <span>See every share.</span></h1>
+            <p class="hero-copy">Silver Pool is a SHA256d BTCS pool built around real block templates, persistent share accounting and honest operational reporting. No invented hashrate, balances or blocks.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="getting-started/">Connect a miner</a>
+              <a class="button button-outline" href="statistics/">View live statistics</a>
+            </div>
+            <p class="hero-note" id="hero-status-text">Checking the pool API…</p>
           </div>
-          <p class="hero-note">Developer preview. Not a production financial service.</p>
+          <aside class="hero-panel" aria-label="Current pool connection">
+            <h2>Live pool</h2>
+            <dl>
+              <div class="row"><dt>Network</dt><dd id="hero-network">—</dd></div>
+              <div class="row"><dt>Stratum</dt><dd class="mono" id="hero-endpoint">Not configured</dd></div>
+              <div class="row"><dt>Node</dt><dd id="hero-node">—</dd></div>
+              <div class="row"><dt>Payouts</dt><dd>Disabled</dd></div>
+            </dl>
+            <p class="hero-note" style="margin-bottom:0">Values refresh from the pool API. An offline state is shown rather than guessed data.</p>
+          </aside>
         </div>
       </section>
 
-      <section id="fees" class="fees section-pad">
+      <section class="section">
         <div class="container">
           <div class="section-heading">
-            <p class="eyebrow">FEES AND REWARDS</p>
-            <h2>Pool Fees</h2>
-            <p>Silver Pool charges a <strong>2.00%</strong> fee on miner rewards. The fee is configurable by the pool operator within a 0.00% – 5.00% range via the <code>BTCS_POOL_FEE</code> environment variable.</p>
-            <div class="fee-details">
-              <p>Default fee: <strong>2.00%</strong></p>
-              <p>Minimum fee: <strong>0.00%</strong></p>
-              <p>Maximum fee: <strong>5.00%</strong></p>
-              <p>Fee recipient: <code>BTCS_POOL_FEE_ADDRESS</code></p>
-              <p>Minimum payout: <strong>0.01 BTCS</strong></p>
-              <p>Payout check interval: <strong>300 seconds (5 min)</strong></p>
-              <p>Automatic payouts: <strong>disabled</strong> until verified end-to-end</p>
+            <div>
+              <p class="eyebrow">POOL SNAPSHOT</p>
+              <h2>Current totals</h2>
+              <p>Every figure below is read from the pool database or BTCS node. Zero is a real zero; unavailable data is labelled.</p>
             </div>
-            <div class="pool-fee-info">
-              <!-- Pool fee info will be populated by JavaScript -->
-            </div>
+            <p class="tabs-note" id="overview-updated">Waiting for API…</p>
+          </div>
+          <div id="overview-state" aria-live="polite"></div>
+          <div class="stat-grid cols-4">
+            <article class="stat-card"><p class="label">Registered miners</p><p class="value" id="stat-miners">—</p><p class="detail" id="stat-miners-detail">Lifetime accounts</p></article>
+            <article class="stat-card"><p class="label">Active in 24h</p><p class="value" id="stat-active">—</p><p class="detail">Miners with accepted shares</p></article>
+            <article class="stat-card"><p class="label">Accepted shares</p><p class="value" id="stat-accepted">—</p><p class="detail" id="stat-rejected">— rejected</p></article>
+            <article class="stat-card"><p class="label">Blocks found</p><p class="value" id="stat-blocks">—</p><p class="detail" id="stat-blocks-detail">— mature</p></article>
+            <article class="stat-card"><p class="label">Pool hashrate (24h estimate)</p><p class="value" id="stat-hashrate">—</p><p class="detail">Share difficulty ÷ elapsed time</p></article>
+            <article class="stat-card"><p class="label">Reward method</p><p class="value" id="stat-reward">—</p><p class="detail" id="stat-fee">— pool fee</p></article>
+            <article class="stat-card"><p class="label">Current height</p><p class="value" id="stat-height">—</p><p class="detail" id="stat-sync">Node sync state</p></article>
+            <article class="stat-card"><p class="label">Current round</p><p class="value" id="stat-round">—</p><p class="detail" id="stat-round-detail">Waiting for a job</p></article>
           </div>
         </div>
       </section>
 
-      <section id="statistics" class="statistics section-pad">
+      <section class="section section-alt">
         <div class="container">
           <div class="section-heading">
-            <p class="eyebrow">NETWORK STATISTICS</p>
-            <h2>Pool Status</h2>
-            <p class="connection-status"><strong>Not connected</strong> — pool statistics are unavailable until the backend is running.</p>
-            <div class="status-grid" data-stat-grid>
-              <div class="status-card" data-stat="totalMiners">
-                <span class="status-dot"></span>
-                <h3>Active Miners</h3>
-                <p>Data unavailable</p>
+            <div>
+              <p class="eyebrow">OPERATIONS</p>
+              <h2>Node, Stratum and database</h2>
+              <p>Health is derived from the actual BTCS RPC response, the Stratum job state and SQLite. The public API never receives RPC credentials.</p>
+            </div>
+          </div>
+          <div class="two-col">
+            <article class="panel">
+              <h3>Service checks</h3>
+              <dl class="definition-list">
+                <div class="row"><dt>Pool API</dt><dd><span class="status-line"><span class="dot dot-unknown" id="overview-api-dot"></span><span id="overview-api-text">checking</span></span></dd></div>
+                <div class="row"><dt>BTCS node</dt><dd><span class="status-line"><span class="dot dot-unknown" id="overview-node-dot"></span><span id="overview-node-text">checking</span></span></dd></div>
+                <div class="row"><dt>Stratum</dt><dd><span class="status-line"><span class="dot dot-unknown" id="overview-stratum-dot"></span><span id="overview-stratum-text">checking</span></span></dd></div>
+                <div class="row"><dt>Database</dt><dd><span class="status-line"><span class="dot dot-unknown" id="overview-db-dot"></span><span id="overview-db-text">checking</span></span></dd></div>
+              </dl>
+              <p class="muted" style="margin-top:1rem"><a class="link-more" href="status/">Open detailed status</a></p>
+            </article>
+            <article class="panel">
+              <h3>Pool configuration</h3>
+              <dl class="definition-list" id="pool-config-list">
+                <div class="row"><dt>Algorithm</dt><dd>—</dd></div>
+                <div class="row"><dt>Fee</dt><dd>—</dd></div>
+                <div class="row"><dt>Minimum payout</dt><dd>—</dd></div>
+                <div class="row"><dt>Coinbase maturity</dt><dd>—</dd></div>
+                <div class="row"><dt>Automatic payouts</dt><dd>Disabled</dd></div>
+              </dl>
+              <p class="muted" style="margin-top:1rem"><a class="link-more" href="pool/">Pool details and fee policy</a></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">BLOCKS</p>
+              <h2>Recent blocks found</h2>
+              <p>Only blocks recorded by this pool are listed. Confirmation counts come from the BTCS node height.</p>
+            </div>
+            <a class="link-more" href="blocks/">All blocks</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Height</th><th>Block hash</th><th>Miner</th><th>Reward</th><th>Status</th><th>Found</th></tr></thead>
+              <tbody id="recent-blocks-body"><tr><td colspan="6" class="table-empty">Waiting for block data…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">SHARES</p>
+              <h2>Latest accepted and rejected shares</h2>
+              <p>Share rows include accepted, stale and rejected submissions. Duplicate submissions are rejected by the database uniqueness rule.</p>
+            </div>
+            <a class="link-more" href="statistics/">Hashrate history</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Miner</th><th>Worker</th><th>Job</th><th>Difficulty</th><th>Result</th><th>Reason</th><th>Time</th></tr></thead>
+              <tbody id="recent-shares-body"><tr><td colspan="7" class="table-empty">Waiting for share data…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="panel panel-dark">
+            <div class="two-col" style="align-items:center">
+              <div>
+                <p class="eyebrow">START MINING</p>
+                <h2 style="color:#fff">Point a SHA256d miner at the configured endpoint.</h2>
+                <p class="muted">The connection page only shows a public endpoint after the pool operator has configured one. It never advertises an example hostname as live.</p>
               </div>
-              <div class="status-card" data-stat="totalShares">
-                <span class="status-dot"></span>
-                <h3>Total Shares</h3>
-                <p>Data unavailable</p>
-              </div>
-              <div class="status-card" data-stat="acceptedShares">
-                <span class="status-dot"></span>
-                <h3>Accepted Shares</h3>
-                <p>Data unavailable</p>
-              </div>
-              <div class="status-card" data-stat="totalBlocks">
-                <span class="status-dot"></span>
-                <h3>Blocks Found</h3>
-                <p>Data unavailable</p>
-              </div>
-              <div class="status-card" data-stat="matureBlocks">
-                <span class="status-dot"></span>
-                <h3>Mature Blocks</h3>
-                <p>Data unavailable</p>
-              </div>
-              <div class="status-card" data-stat="immatureBlocks">
-                <span class="status-dot"></span>
-                <h3>Immature Blocks</h3>
-                <p>Data unavailable</p>
+              <div>
+                <p class="muted" style="margin-bottom:0.4rem">Current Stratum endpoint</p>
+                <p class="mono" id="overview-cta-endpoint" style="font-size:1.15rem;color:#fff">Not configured</p>
+                <p style="margin-top:1rem"><a class="button button-primary" href="getting-started/">Connection guide</a></p>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      <section id="recent-blocks" class="recent-blocks section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">BLOCKS</p>
-            <h2>Recent Blocks</h2>
-          </div>
-          <div class="recent-blocks-list">
-            <p>Blocks found by the pool will appear here with confirmation status and reward details.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="recent-shares" class="recent-shares section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">SHARES</p>
-            <h2>Recent Shares</h2>
-          </div>
-          <div class="recent-shares-list">
-            <p>Share data will appear here when the pool backend is connected. Hashrate, shares, and status are shown in real time.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="mining" class="mining section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">MINING</p>
-            <h2>How to Mine BTCS</h2>
-            <p>Silver Pool uses the Stratum V1 protocol over TCP. Miners connect with a worker name and mine directly to the pool.</p>
-            <div class="connection-info">
-              <h3>Pool Connection</h3>
-              <p>Stratum endpoint: <code>stratum.silver-pool.example:3456</code></p>
-              <p>User format: <code>WALLET_ADDRESS.WORKER_NAME</code></p>
-              <p class="muted">Replace <code>stratum.silver-pool.example:3456</code> with the actual pool hostname when deployed.</p>
-            </div>
-            <div class="miner-setup">
-              <h3>Miner Configuration</h3>
-              <pre><code># Example for CCMiner/SGminer/BMiner
-SERVER=stratum.silver-pool.example:3456
-USER=btcs1qxyz...worker1
-PASS=x</code></pre>
-              <p>Replace the server address with the deployed pool hostname.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="workers" class="workers section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">WORKERS</p>
-            <h2>Connected Workers</h2>
-            <p>Worker data will appear here when the pool backend is connected. Hashrate, shares, and status are shown in real time.</p>
-            <div class="miner-status-grid">
-              <!-- Miner statuses will be populated by JavaScript -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="blocks" class="blocks section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">BLOCKS</p>
-            <h2>Recent Blocks</h2>
-            <p>Blocks found by the pool will appear here with confirmation status and reward details.</p>
-            <div class="status-card offline">
-              <span class="status-dot"></span>
-              <h3>Blocks Found</h3>
-              <p>0</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="coins" class="coins section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">COINS</p>
-            <h2>Supported Coins</h2>
-            <p>Silver Pool mines <strong>Bitcoin Silver (BTCS)</strong>. Additional coin support is planned for future releases.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="docs" class="docs section-pad">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">DOCUMENTATION AND STATUS</p>
-            <h2>Project Status</h2>
-            <p>Silver Pool is under active development. The pool backend (Stratum V1, accounting, block templates) is implemented and tested. The public website is a developer preview.</p>
-            <h3>Implemented</h3>
-            <ul>
-              <li>Stratum V1 protocol server</li>
-              <li>Miner authentication and worker management</li>
-              <li>Share validation and difficulty adjustment</li>
-              <li>Block template generation</li>
-              <li>Accounting and reward calculation</li>
-              <li>Fee configuration (0.00% – 5.00%)</li>
-            </ul>
-            <h3>Tested</h3>
-            <ul>
-              <li>6/6 unit tests passing (accounting, block templates, stratum)</li>
-            </ul>
-            <h3>In Progress</h3>
-            <ul>
-              <li>End-to-end payout verification</li>
-              <li>Live pool backend integration with website</li>
-              <li>Production deployment</li>
-            </ul>
-            <h3>Known Limitations</h3>
-            <ul>
-              <li>No live pool data connected to website</li>
-              <li>Automatic payouts disabled until verified</li>
-              <li>Pool statistics show placeholder values</li>
-            </ul>
-            <h3>Source</h3>
-            <p><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" target="_blank" rel="noopener noreferrer">GitHub: Silver-Pool</a></p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SPA page containers for client-side routing -->
-      <section id="page-overview" class="hidden"></section>
-      <section id="page-statistics" class="hidden"></section>
-      <section id="page-miners" class="hidden"></section>
-      <section id="page-miner" class="hidden"></section>
-      <section id="page-blocks" class="hidden"></section>
-      <section id="page-getting-started" class="hidden"></section>
-      <section id="page-pool" class="hidden"></section>
-      <section id="page-api-docs" class="hidden"></section>
-      <section id="page-status" class="hidden"></section>
-      <section id="page-help" class="hidden"></section>
-
     </main>
 
     <footer class="site-footer">
       <div class="container">
-        <p>Silver Pool — Bitcoin Silver Mining Pool. Operated by Silver Labs Technology &amp; Development.</p>
-        <p>Developer preview. Not a production financial service.</p>
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+            <p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p>
+          </div>
+          <div><h2>Pool</h2><ul><li><a href="statistics/">Statistics</a></li><li><a href="miners/">Miners</a></li><li><a href="blocks/">Blocks</a></li><li><a href="pool/">Configuration</a></li></ul></div>
+          <div><h2>Miners</h2><ul><li><a href="getting-started/">Getting started</a></li><li><a href="help/">Troubleshooting</a></li><li><a href="api-docs/">API documentation</a></li><li><a href="status/">Service status</a></li></ul></div>
+          <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+        </div>
+        <div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div>
       </div>
     </footer>
   </body>

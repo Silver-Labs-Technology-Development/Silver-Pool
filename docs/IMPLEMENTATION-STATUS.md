@@ -1,88 +1,233 @@
-# Silver Pool — Implementation Status
+# Silver Pool — implementation status
 
-**Last updated**: 2026-10-24
+**Last updated:** 2026-10-26
+**Version:** `0.2.0`
 
-## Project Identity
+## Classification
 
 | Field | Value |
 |---|---|
-| **Product name** | Silver Pool |
-| **Organization** | Silver Labs Technology & Development |
-| **Primary blockchain** | Bitcoin Silver (BTCS) |
-| **GitHub repository** | `https://github.com/Silver-Labs-Technology-Development/Silver-Pool.git` |
-| **Local checkout path** | `/home/user/Silver-Labs/Silver-Pool` |
-| **Default branch** | `main` |
-| **Git remote** | `origin` → `https://github.com/Silver-Labs-Technology-Development/Silver-Pool.git` |
+| Product | Silver Pool |
+| Chain | Bitcoin Silver (BTCS), SHA256d |
+| Verified stage | Local regtest prototype |
+| Real node used | Bitcoin Silver Core `v31.1.3` |
+| Production / mainnet | **No** |
+| Public deployment | **No** |
+| Payouts | **Disabled** |
+| Repository | `https://github.com/Silver-Labs-Technology-Development/Silver-Pool` |
 
-## Source Code Overview
+The verification below was performed on this machine against a throwaway
+regtest datadir. It is not evidence of cloud, testnet, regtest-hosted, or
+mainnet operation.
 
-| Module | Status | Key Functions |
+## Implemented backend
+
+| Module | Implemented behavior |
+|---|---|
+| `config.py` | `PoolConfig` dataclass; environment and optional JSON overrides; network-port defaults; fee 0–5%; positive difficulty/min payout; extranonce2 size 1–32; public redacted view |
+| `rpc.py` | Authenticated JSON-RPC for base and wallet endpoints; `getblocktemplate`, `submitblock`, `getblockchaininfo`, network/mempool info, `getblockhash`, wallet create/load/address, `validateaddress`/`getaddressinfo` |
+| `node.py` | Five-second cached snapshot; connected/synced/IBD/progress/connections/mempool/warnings/error; failures returned as data, not raised to API callers |
+| `block.py` | BIP34 height encoding including `OP_0`/`OP_1`–`OP_16`; varint; coinbase with witness commitment; merkle root/branch; internal/display byte order; header/block assembly; bits and difficulty targets; target boundary check |
+| `db.py` | SQLite WAL, foreign keys, busy timeout, ordered migrations, short `BEGIN IMMEDIATE` transactions, backup, legacy-table quarantine and import; no in-memory fallback |
+| `accounting.py` | Miner/worker registration; share insert with duplicate detection; round rotation; difficulty-weighted per-round PPLNS; exact integer fee split; immature/available balances; maturity and orphan reconciliation; fee ledger; payout ledger state transitions |
+| `stratum.py` | Stratum V1 subscribe/authorize/suggest-difficulty/notify/configure/submit; per-session extranonce1; miner extranonce2; stale and duplicate rejection; block assembly and real `submitblock`; rejected-candidate audit; reconnect; shutdown |
+| `api.py` | 17 routes (15 data endpoints plus `/api/docs` and `/api/openapi.json`); envelopes; request IDs; CORS; rate limiting; trusted-proxy handling; validation; 404/405/500; health/readiness; OpenAPI |
+| `server.py` | Coinbase script resolution (address, script or wallet); API and Stratum startup; template polling; maturity loop; signal handling; orderly shutdown |
+
+## HTTP endpoints
+
+All data endpoints except `/api/openapi.json` use the common envelope.
+
+| Method | Path | Notes |
 |---|---|---|
-| `block.py` | Implemented | `dsha256`, `reverse_bytes`, `encode_height`, `varint`, `build_coinbase_tx`, `build_block_bytes`, `block_hash`, `target_from_bits` |
-| `stratum.py` | Implemented | Stratum server with `mining.subscribe`, `mining.authorize`, `mining.notify`, `mining.submit`; job polling; share validation; block submission via RPC |
-| `accounting.py` | Implemented | SQLite-backed miner/shares/blocks tracking with UNIQUE constraints; duplicate detection |
-| `rpc.py` | Implemented | BTCS RPC client: `getblocktemplate`, `submitblock`, `getblockchaininfo`, `getmininginfo`, `getaddressinfo`, `getnewaddress` |
-| `config.py` | Implemented | `PoolConfig` dataclass with env-variable overrides; RPC URL, user, password, wallet, pool address, stratum settings, DB path, poll interval, extranonce2 size, difficulty, pool fee (2%) |
-| `api_server.py` | Implemented | HTTP API server on port 8080 with endpoints: `/pool/status`, `/pool/miners`, `/pool/statistics`, `/pool/blocks/recent`, `/health` |
+| GET | `/api/health` | Liveness; database health; HTTP 200 even when degraded |
+| GET | `/api/ready` | HTTP 503 until database, node, job and template checks pass |
+| GET | `/api/status` | Combined checks, node, Stratum, pool totals |
+| GET | `/api/pool/status` | Overview plus recent blocks/shares/round/config |
+| GET | `/api/pool/statistics` | Totals and 24-hour hashrate estimate |
+| GET | `/api/pool/history/hashrate` | `range=1h`, `6h`, `24h` (default), `7d` |
+| GET | `/api/pool/miners` | `limit` 1–200 (default 50), `search` ≤ 80 chars |
+| GET | `/api/pool/miner/{username}` | Miner, workers, balances, recent blocks |
+| GET | `/api/pool/miner/{username}/shares` | `limit` 1–200 |
+| GET | `/api/pool/shares/recent` | `limit` 1–200 |
+| GET | `/api/pool/blocks` | `limit`, `status=all\|immature\|mature\|orphaned` |
+| GET | `/api/pool/blocks/recent` | `limit` |
+| GET | `/api/pool/fee-ledger` | `limit` |
+| GET | `/api/pool/rounds/current` | Current active round or `null` |
+| GET | `/api/pool/config` | Public configuration; no secrets |
+| GET | `/api/docs` | Enveloped endpoint index |
+| GET | `/api/openapi.json` | Raw OpenAPI 3.0.3 document |
 
-## Configuration
+There is no authentication, mutation endpoint, admin endpoint or payout
+endpoint. Deployment exposes the API only through the private Caddy proxy.
 
-- **Pool fee**: 2.0% (default in `config.py`, configurable via `BTCS_POOL_FEE` env var)
-- **RPC URL**: `http://127.0.0.1:18443` (overrideable via `BTCS_RPC_URL`)
-- **RPC user**: `test` (overrideable via `BTCS_RPC_USER`)
-- **RPC password**: `test` (overrideable via `BTCS_RPC_PASSWORD`)
-- **Stratum port**: 3333 (overrideable via `BTCS_STRATUM_PORT`)
-- **Database**: `data/pool.sqlite3` (SQLite with WAL mode)
+## Persistence
 
-## Test Results
+The initial migration creates:
 
-| Test File | Tests | Status |
-|---|---|---|
-| `tests/test_block.py` | 3/3 | PASS (encode_height, varint, dsha256) |
-| `tests/test_accounting.py` | 1/1 | PASS (share duplicate detection) |
-| **Total** | **4/4** | **PASS** |
+- `schema_migrations`
+- `miners`, `workers`
+- `rounds`, `jobs`
+- `shares` with unique `(miner_id, job_id, extranonce2, ntime, nonce)`
+- `block_candidates`
+- `blocks`
+- `reward_allocations`
+- `miner_balances`
+- `pool_fee_ledger`
+- `payouts`
 
-## Known Limitations
+All monetary columns are integer satoshis. Legacy databases without a
+`schema_migrations` table are quarantined as `legacy_*`, migrated, and compatible
+rows imported. `PRAGMA foreign_key_check` is covered by tests.
 
-- No live payouts (payout mechanism disabled until security review)
-- No mainnet pool operations (regtest/testnet only)
-- Website is developer preview, not production-deployed
-- Automatic payouts disabled until verified
+SQLite is a single-node store. The design is safe for one integrated pool
+process with WAL and short write transactions, not for horizontal scaling or
+high availability.
 
-## API Endpoints
+## Accounting and payout boundary
 
-The following HTTP API endpoints are available on the pool API server (port 8080):
-
-- `GET /pool/status` - Pool status (difficulty, network hashrate, mining status)
-- `GET /pool/miners` - List of registered miners with share counts and blocks
-- `GET /pool/statistics` - Pool statistics (difficulty, total shares, fee ledger, blocks found)
-- `GET /pool/blocks/recent` - Recent blocks found by the pool
-- `GET /health` - Health check
-
-## Pool Modes
-
-- **Solo mining**: Each miner submits valid shares; block submitted when conditions met; dashboard shows shares, hashrate, accepted/rejected, blocks found
-- **Shared pool mining**: PPLNS-style reward distribution; shares tracked by round; fee calculated as 2% of distributable rewards
-
-## BTCS Node Connection
-
-- Node running in regtest mode
-- RPC accessible at `http://127.0.0.1:18443` with `rpcuser=test` and `rpcpassword=test`
-- Block templates retrievable via `getblocktemplate`
-- Block submission via `submitblock` working
-- Block validation and chain tracking functional
+- PPLNS weights are `SUM(difficulty)` of accepted, non-stale shares in the
+  current template-height round.
+- If a block round has no shares, the finder receives the full reward.
+- The last allocation receives the integer remainder, so allocations reconcile
+  exactly to the block value.
+- Rewards are immature until the configured maturity (default 200
+  confirmations).
+- Orphans reverse pending allocations and immature balances and mark the fee
+  ledger entry orphaned.
+- The fee ledger is separate from miner balances.
+- `payouts` supports `request_payout`, `cancel_payout` and `mark_payout_sent`
+  for accounting tests. It does **not** construct, sign or broadcast a
+  transaction, and no API exposes it.
+- `BTCS_AUTO_PAYOUTS` must remain `false`. The container entrypoint exits
+  non-zero for any other value, and the public API always reports
+  `auto_payouts: false` and `payouts_enabled: false`.
 
 ## Website
 
-- Vite-based static site in `site/`
-- Routes: `/`, `/statistics`, `/miners`, `/miner`, `/blocks`, `/getting-started`, `/pool`, `/api-docs`, `/status`, `/help`
-- API base URL configurable via `API_BASE_URL` environment variable
-- Currently configured to connect to `http://127.0.0.1:8080` (API server)
+Ten independently built HTML routes:
 
-## Next Steps
+| Route | Content |
+|---|---|
+| `/` | Overview and live pool summary |
+| `/statistics/` | Totals, hashrate chart/history |
+| `/miners/` | Miner list, search, live values |
+| `/miner/` | Miner detail by query, workers and blocks |
+| `/blocks/` | Recent blocks and status |
+| `/getting-started/` | Real endpoint when configured; “Not configured” otherwise |
+| `/pool/` | Fees, reward method, payout policy, disabled status |
+| `/api-docs/` | Endpoint reference and OpenAPI link |
+| `/status/` | API, database, node, Stratum and readiness state |
+| `/help/` | Troubleshooting and honest diagnostics |
 
-- Implement full PPLNS shared pool accounting
-- Add comprehensive test suite (stratum lifecycle, share validation, fee calculation)
-- Create miner connection guide documentation
-- Implement production deployment configuration
-- Add reorganization handling in accounting
+The site uses shared ES modules, relative `/api` fetch, accessible single `h1`
+per page, responsive navigation and explicit loading/empty/error states. It
+never substitutes sample miners, hashrate, blocks, balances, uptime or payouts
+when the API is unavailable.
+
+The Vite build uses `SITE_BASE` (default `/`). The Pages workflow uses
+`/Silver-Pool/`. The development server proxies `/api` to `127.0.0.1:8765` and
+returns an explicit JSON 502 when the backend is unreachable.
+
+## Verification evidence
+
+### Python
+
+Command:
+
+```sh
+python3 -m pytest -q tests
+```
+
+Result: **100 passed, 0 failed, 0 skipped** in 34.85 seconds (2026-10-26).
+The real-node E2E ran because `bitcoinsilverd` was available.
+
+Coverage by file:
+
+| File | Covered behavior |
+|---|---|
+| `test_block.py` | Varint boundaries; BIP34 heights 0/1/16/17/…; byte order; regtest targets; hash boundary; merkle roots/branches; coinbase split; full header/block assembly |
+| `test_db.py` | Fresh migrations/WAL; reopen/idempotence; rollback; backup; legacy quarantine/import; foreign keys; explicit path |
+| `test_accounting.py` | Identity parsing; exact PPLNS math; registration/workers/duplicates; allocation/maturity/orphan; hashrate history; payout boundary; finder fallback |
+| `test_config.py` | Loopback defaults; payouts disabled; env overrides; network port defaults; invalid values; secret redaction; JSON config |
+| `test_rpc.py` | Auth, wallet path, `getblocktemplate` rules, domain errors, HTTP auth errors, connection failure, missing wallet |
+| `test_node.py` | Snapshot/caching; IBD not synced; RPC failure as data; cache TTL; dataclass |
+| `test_stratum.py` | Subscribe/authorize/job/extranonce; authorization failures and unknown methods; difficulty/share/duplicate; invalid share classes; stale after tip change; accepted block submission; rejected `submitblock`; shutdown; reconnect |
+| `test_api.py` | Envelopes/request IDs/headers; online status and payout flags; readiness success/failure; degraded liveness; miners/detail/search; statistics/blocks/hashrate/round/fee ledger; secret-free config; CORS; rate limit; trusted proxy; 404/405/500 |
+| `test_deployment.py` | Compose services/volumes/ordering/healthchecks/restart; RPC/API not published; production overlay; pinned checksum; non-root images; Caddy routing/headers; placeholder env; `.dockerignore` |
+| `test_e2e_regtest.py` | Real daemon, 10 generated blocks, real template, Stratum subscribe/authorize/notify, block found and accepted at height 11, canonical hash match, immature accounting, duplicate, stale, API visibility, restart persistence |
+
+### Website
+
+```sh
+cd site
+npm ci
+npm test             # 8 passed
+npm run test:browser # 7 passed
+npm run build
+```
+
+- Static suite: every route has one `h1`, unique title/description, full
+  navigation, resolvable internal assets, no fake endpoints or payout claims,
+  no deleted single-page references, built-output integrity, Vite inputs and
+  package scripts.
+- Browser suite: all ten direct loads, titles/headings/active nav, live API
+  values, miner search/detail, navigation, back/forward, reload, mobile menu
+  without horizontal overflow, and API-error states on every page.
+- Build: all ten `index.html` pages plus hashed assets in `site/_site`.
+
+Browser tests use installed Chrome through a small CDP client because
+Playwright was unavailable in this environment.
+
+### Deployment files
+
+```sh
+docker compose --env-file .env.example -f deploy/docker-compose.yml config
+SILVER_POOL_SITE_ADDRESS=pool.invalid docker compose --env-file .env.example \
+  -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml config
+```
+
+Both pass. This validates interpolation and schema, not container runtime.
+
+## Deployment state
+
+The Compose stack is complete in the repository:
+
+- official BTCS Core `31.1.3` release URL and SHA256
+- persistent named volumes for chain, pool DB and Caddy state
+- node healthcheck and pool startup ordering
+- chain/network verification before the pool starts
+- private RPC; private API
+- non-root pool image; dropped capabilities; `no-new-privileges`
+- Caddy static MPA, `/api` reverse proxy, security headers, clean-route
+  redirects, TLS overlay
+- `.env.example` with placeholders only; payouts disabled
+
+No image was built or started here. The Docker socket is `root:docker`, the
+current user is not in the `docker` group, and `sudo` requires a password.
+Caddy is not installed; the package download timed out and the partial `.deb`
+could not be extracted. Therefore container startup, healthchecks, volume
+permissions, RPC connectivity from the pool container, Caddy routing and TLS
+remain unverified.
+
+## Not implemented / blockers
+
+| Item | State |
+|---|---|
+| Live cloud deployment | Blocked: no provider credentials, host, DNS or firewall access |
+| Public Stratum endpoint | Blocked: no public host/port; `BTCS_PUBLIC_STRATUM_HOST` unset |
+| Mainnet pool | Blocked: no mainnet node, funding, operations or public infrastructure |
+| GitHub Pages live URL | Not verified; workflow configured but not run here. Static-only; no API/Stratum |
+| Docker build/runtime | Blocked by socket permissions |
+| Caddy runtime | Blocked: Caddy unavailable |
+| Payouts | Disabled by design; signing/broadcast/confirmation/recovery not implemented |
+| Rolling-window PPLNS | Not implemented; current model is per-round difficulty-weighted |
+| Vardiff | Not implemented; static per-session difficulty with optional miner suggestion |
+| HA / multi-node database | Not supported; SQLite single-writer design |
+| Security audit | Not performed |
+
+## Historical documents
+
+`docs/AUDIT-REPORT.md` and `docs/REPOSITORY-AUDIT.md` are snapshots from
+2026-10-24. Their counts, endpoint lists and “missing” classifications are
+historical and have been superseded by this document.

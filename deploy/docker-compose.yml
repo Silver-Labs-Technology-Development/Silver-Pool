@@ -1,0 +1,129 @@
+name: silver-pool
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  node:
+    build:
+      context: ..
+      dockerfile: deploy/node/Dockerfile
+      args:
+        BTCS_VERSION: ${BTCS_VERSION:-31.1.3}
+        BTCS_RELEASE_URL: ${BTCS_RELEASE_URL:-https://github.com/bitcoin-silver/core/releases/download/version31.1.3/bitcoinsilver-31.1.3-x86_64-linux-gnu.tar.gz}
+        BTCS_RELEASE_SHA256: ${BTCS_RELEASE_SHA256:-6743ecef53501687574a5f761ddb41dcce960953e0e0b6ef362ab69268767c4c}
+    image: silver-pool/btcs-node:${BTCS_VERSION:-31.1.3}
+    restart: unless-stopped
+    init: true
+    environment:
+      BTCS_NETWORK: ${BTCS_NETWORK:-main}
+      BTCS_RPC_USER: ${BTCS_RPC_USER:?BTCS_RPC_USER must be set in .env}
+      BTCS_RPC_PASSWORD: ${BTCS_RPC_PASSWORD:?BTCS_RPC_PASSWORD must be set in .env}
+      BTCS_RPC_PORT: ${BTCS_RPC_PORT:-10567}
+      BTCS_P2P_PORT: ${BTCS_P2P_PORT:-10566}
+      BTCS_RPC_ALLOW_CIDR: ${BTCS_RPC_ALLOW_CIDR:-172.16.0.0/12}
+      BTCS_NODE_MAX_CONNECTIONS: ${BTCS_NODE_MAX_CONNECTIONS:-64}
+      BTCS_NODE_DBCACHE_MB: ${BTCS_NODE_DBCACHE_MB:-300}
+    volumes:
+      - node-data:/data
+    ports:
+      # P2P only. RPC is never published; it is reachable only on the
+      # private Compose network by the pool service.
+      - "${BTCS_P2P_PORT:-10566}:${BTCS_P2P_PORT:-10566}"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/btcs-node-healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  pool:
+    build:
+      context: ..
+      dockerfile: deploy/pool/Dockerfile
+    image: silver-pool/pool:${SILVER_POOL_VERSION:-0.2.0}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      node:
+        condition: service_healthy
+    environment:
+      BTCS_NETWORK: ${BTCS_NETWORK:-main}
+      BTCS_RPC_URL: ${BTCS_RPC_URL:-http://node:10567}
+      BTCS_RPC_USER: ${BTCS_RPC_USER:?BTCS_RPC_USER must be set in .env}
+      BTCS_RPC_PASSWORD: ${BTCS_RPC_PASSWORD:?BTCS_RPC_PASSWORD must be set in .env}
+      BTCS_RPC_WALLET: ${BTCS_RPC_WALLET:-pool}
+      BTCS_RPC_TIMEOUT_SECONDS: ${BTCS_RPC_TIMEOUT_SECONDS:-30}
+      BTCS_NODE_WAIT_SECONDS: ${BTCS_NODE_WAIT_SECONDS:-300}
+      BTCS_POOL_ADDRESS: ${BTCS_POOL_ADDRESS:-}
+      BTCS_POOL_SCRIPT_PUBKEY: ${BTCS_POOL_SCRIPT_PUBKEY:-}
+      BTCS_POOL_FEE: ${BTCS_POOL_FEE:-2.0}
+      BTCS_MIN_PAYOUT: ${BTCS_MIN_PAYOUT:-0.01}
+      BTCS_PAYOUT_INTERVAL_SECONDS: ${BTCS_PAYOUT_INTERVAL_SECONDS:-300}
+      BTCS_AUTO_PAYOUTS: "false"
+      BTCS_MATURITY_CONFIRMATIONS: ${BTCS_MATURITY_CONFIRMATIONS:-200}
+      BTCS_STRATUM_PORT: ${BTCS_STRATUM_PORT:-3333}
+      BTCS_PUBLIC_STRATUM_HOST: ${BTCS_PUBLIC_STRATUM_HOST:-}
+      BTCS_PUBLIC_STRATUM_PORT: ${BTCS_STRATUM_PORT:-3333}
+      BTCS_STRATUM_PASSWORD: ${BTCS_STRATUM_PASSWORD:-}
+      BTCS_POOL_DIFFICULTY: ${BTCS_POOL_DIFFICULTY:-1.0}
+      BTCS_EXTRANONCE2_SIZE: ${BTCS_EXTRANONCE2_SIZE:-4}
+      BTCS_POOL_POLL: ${BTCS_POOL_POLL:-5}
+      BTCS_MAX_CLIENTS: ${BTCS_MAX_CLIENTS:-500}
+      BTCS_CLIENT_TIMEOUT_SECONDS: ${BTCS_CLIENT_TIMEOUT_SECONDS:-900}
+      BTCS_POOL_API_HOST: 0.0.0.0
+      BTCS_POOL_API_PORT: 8765
+      BTCS_API_CORS_ORIGINS: ${BTCS_API_CORS_ORIGINS:-http://127.0.0.1:8080}
+      BTCS_API_RATE_LIMIT_PER_MINUTE: ${BTCS_API_RATE_LIMIT_PER_MINUTE:-240}
+      BTCS_TRUSTED_PROXIES: ${BTCS_TRUSTED_PROXIES:-172.16.0.0/12}
+      BTCS_POOL_DB: /data/pool.sqlite3
+      BTCS_LOG_LEVEL: ${BTCS_LOG_LEVEL:-INFO}
+    volumes:
+      - pool-data:/data
+    ports:
+      # Public Stratum port. API (8765) stays on the private network.
+      - "${BTCS_STRATUM_PORT:-3333}:${BTCS_STRATUM_PORT:-3333}"
+    expose:
+      - "8765"
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web/Dockerfile
+      args:
+        SITE_BASE: ${SITE_BASE:-/}
+    image: silver-pool/web:${SILVER_POOL_VERSION:-0.2.0}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      pool:
+        condition: service_started
+    environment:
+      SILVER_POOL_SITE_ADDRESS: ${SILVER_POOL_SITE_ADDRESS:-:80}
+    ports:
+      - "${SILVER_POOL_HTTP_BIND:-127.0.0.1}:${SILVER_POOL_HTTP_PORT:-8080}:80"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  node-data:
+  pool-data:
+  caddy-data:
+  caddy-config:

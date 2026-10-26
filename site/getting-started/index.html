@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool getting started — connect a SHA256d BTCS miner using the actual configured Stratum endpoint.">
+    <title>Getting Started — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/getting-started.js"></script>
+  </head>
+  <body data-page="getting-started">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+        <a href="../" data-page="overview">Overview</a><a href="../statistics/" data-page="statistics">Statistics</a><a href="../miners/" data-page="miners">Miners</a><a href="../blocks/" data-page="blocks">Blocks</a><a href="../getting-started/" data-page="getting-started">Getting Started</a><a href="../pool/" data-page="pool">Pool</a><a href="../api-docs/" data-page="api-docs">API</a><a href="../status/" data-page="status">Status</a><a href="../help/" data-page="help">Help</a>
+      </nav>
+    </div></header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">GETTING STARTED</p><h1>Connect a BTCS miner</h1><p>Silver Pool speaks Stratum V1 and validates SHA256d shares. The endpoint below is rendered from the pool's public configuration; if none is configured, none is shown.</p></div></section>
+      <section class="section">
+        <div class="container">
+          <div id="connect-state" aria-live="polite"></div>
+          <div id="connect-content" hidden>
+            <div class="two-col" style="margin-bottom:1.5rem">
+              <article class="panel">
+                <h2>Connection</h2>
+                <p class="muted">This is the actual public endpoint configured for this deployment.</p>
+                <div class="copy-row" style="margin-bottom:1rem"><code id="stratum-endpoint" class="mono">—</code><button class="button button-dark button-small" type="button" data-copy-target="stratum-endpoint">Copy</button></div>
+                <dl class="definition-list">
+                  <div class="row"><dt>Protocol</dt><dd>Stratum V1 (TCP)</dd></div>
+                  <div class="row"><dt>Algorithm</dt><dd id="connect-algorithm">SHA256d</dd></div>
+                  <div class="row"><dt>Starting difficulty</dt><dd id="connect-difficulty">—</dd></div>
+                  <div class="row"><dt>Extranonce2 size</dt><dd id="connect-extranonce">—</dd></div>
+                  <div class="row"><dt>Pool fee</dt><dd id="connect-fee">—</dd></div>
+                  <div class="row"><dt>Reward method</dt><dd id="connect-reward">PPLNS</dd></div>
+                </dl>
+              </article>
+              <article class="panel">
+                <h2>Username and password</h2>
+                <p><strong>Username format:</strong></p>
+                <div class="copy-row" style="margin-bottom:1rem"><code id="worker-format" class="mono">YOUR_BTCS_ACCOUNT.WORKER</code><button class="button button-dark button-small" type="button" data-copy-target="worker-format">Copy</button></div>
+                <p id="account-guidance" class="muted">Use a stable account label. The worker suffix identifies an individual device.</p>
+                <p><strong>Password:</strong> <span id="password-guidance">—</span></p>
+                <div class="callout callout-warning"><p><strong>Payouts are disabled.</strong> The current release records accounting balances but does not sign or send BTCS payments. Do not treat any displayed balance as withdrawable.</p></div>
+              </article>
+            </div>
+
+            <section aria-labelledby="examples-heading">
+              <div class="section-heading" style="margin-bottom:1rem"><div><p class="eyebrow">MINER EXAMPLES</p><h2 id="examples-heading">Copy a command</h2><p>Replace the account and worker placeholders. The examples below use the actual configured endpoint and password convention.</p></div></div>
+              <div class="two-col">
+                <article class="panel"><h3>cpuminer / minerd</h3><pre><code id="example-cpuminer"></code></pre><button class="button button-outline button-small" type="button" data-copy-target="example-cpuminer" style="color:var(--ink);border-color:var(--line)">Copy command</button></article>
+                <article class="panel"><h3>cgminer</h3><pre><code id="example-cgminer"></code></pre><button class="button button-outline button-small" type="button" data-copy-target="example-cgminer" style="color:var(--ink);border-color:var(--line)">Copy command</button></article>
+              </div>
+              <div class="panel" style="margin-top:1rem"><h3>bfgminer</h3><pre><code id="example-bfgminer"></code></pre><button class="button button-outline button-small" type="button" data-copy-target="example-bfgminer" style="color:var(--ink);border-color:var(--line)">Copy command</button></div>
+              <p class="muted" style="margin-top:0.8rem">These miners must support SHA256d and Stratum V1. Silver Pool does not bundle or endorse a specific miner binary; verify the binary you download from its own project.</p>
+            </section>
+
+            <section class="section-tight" aria-labelledby="flow-heading">
+              <div class="section-heading" style="margin-bottom:1rem"><div><p class="eyebrow">HOW IT WORKS</p><h2 id="flow-heading">What happens after you connect</h2></div></div>
+              <ol class="steps">
+                <li><strong>Subscribe and authorize.</strong> The pool returns a session-specific extranonce1 and accepts your <code>ACCOUNT.WORKER</code> identity.</li>
+                <li><strong>Receive a job.</strong> Every job is built from a real <code>getblocktemplate</code> response from BTCS Core, including merkle branches and the current network target.</li>
+                <li><strong>Submit shares.</strong> Each share is checked against the session difficulty. Duplicate, stale, malformed and low-difficulty submissions are rejected with a reason.</li>
+                <li><strong>Block candidates.</strong> If a share also meets the network target, the assembled block is submitted with <code>submitblock</code>. Only node-accepted blocks are recorded as blocks.</li>
+              </ol>
+            </section>
+          </div>
+
+          <div class="callout"><p><strong>Never send private keys.</strong> Silver Pool never needs a wallet private key, seed phrase or exchange password. The Stratum username is an accounting label, not a signing credential.</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

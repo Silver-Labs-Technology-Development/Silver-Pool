@@ -1,65 +1,133 @@
-# Silver Pool v1.0.0 Release Checklist
+# Silver Pool release readiness checklist
+
+**Status:** not approved for release as a paying or public pool.
+**Last verified:** 2026-10-26.
+**Stage:** local regtest prototype against real BTCS Core `v31.1.3`.
+
+This checklist records verified evidence and open gates. A checked box means the
+item was exercised locally, not that production infrastructure exists.
 
 ## Gate 1 — Accounting
-- [x] Fee configuration and validation pass (2.00% default, 0-5% range, BTCS_POOL_FEE env var)
-- [x] Reward accounting reconciles exactly (gross reward → fee → miner allocations)
-- [ ] Miner balances and operator fees remain separate
-- [x] Duplicate processing is prevented
-- [ ] Restart and reorganization tests pass
+
+- [x] Fee configuration validates: 0–5%, default 2.00%, `BTCS_POOL_FEE`.
+- [x] Fees are recorded separately from miner balances in `pool_fee_ledger`.
+- [x] Reward allocation reconciles exactly: gross, fee and net remainders are
+      assigned so totals equal the block value.
+- [x] Duplicate shares are rejected by a unique constraint and are not
+      double-counted.
+- [x] Maturity moves pending allocations and immature balances to available.
+- [x] Orphan reconciliation reverses pending allocations and fee entries.
+- [x] Database restart persistence is verified by the real-node E2E and DB
+      tests.
+- [ ] Reorganization handling verified against a real chain reorg. Unit-level
+      canonical-hash reconciliation is tested; a live regtest reorg is not.
+- [ ] Payout batch accounting, idempotency and recovery. Not implemented.
 
 ## Gate 2 — Mining
-- [ ] A real regtest miner connects
-- [ ] Valid and invalid shares are correctly classified
-- [ ] A candidate block reaches the node
-- [ ] The node accepts a block
-- [ ] Accounting reflects the correct block state
+
+- [x] A real BTCS Core regtest node serves `getblocktemplate`.
+- [x] A protocol-level Stratum client subscribes, authorizes and receives a job.
+- [x] Valid, invalid, duplicate and stale shares are classified correctly.
+- [x] A valid block candidate is assembled and sent through `submitblock`.
+- [x] The real node accepts the block; canonical hash matches at the submitted
+      height.
+- [x] Accounting records the immature reward and the fee split.
+- [x] API exposes the accepted block, miner share counts and Stratum status.
+- [x] Reconnect after disconnect receives the current job.
+- [x] Shutdown disconnects clients and stops the status listener.
+- [ ] A third-party miner application (for example cgminer/BFGMiner) has been
+      connected. The E2E uses an in-repo Stratum protocol client, not an
+      external miner binary.
+- [ ] Public Stratum TCP reachability. No public endpoint exists.
 
 ## Gate 3 — Payouts
-- [ ] Immature and orphaned rewards cannot be paid
-- [ ] Mature balances can enter the payout queue
-- [ ] Signing and submission are tested end to end before automatic payouts can be enabled
-- [ ] Duplicate payments are prevented
-- [ ] Recovery and reconciliation are demonstrated
+
+- [ ] Immature and orphaned rewards cannot be paid. The accounting boundary is
+      tested, but no payout executor exists.
+- [ ] Mature balances can enter a payout queue. Queue/executor not implemented.
+- [ ] Signing and submission are tested end to end. Not implemented.
+- [ ] Duplicate payments are prevented across crashes/retries. Not implemented.
+- [ ] Recovery and reconciliation are demonstrated. Not implemented.
+- [ ] Operator authentication and authorization. Not implemented.
+- [x] Automatic payouts are disabled by default.
+- [x] The deployment entrypoint refuses `BTCS_AUTO_PAYOUTS` values other than
+      `false`.
+- [x] The public API reports `auto_payouts: false` and `payouts_enabled: false`.
 
 ## Gate 4 — Security and UI
-- [ ] No secret leakage
-- [ ] Operator endpoints are protected
-- [ ] Dashboard values reflect real backend state
-- [ ] User-facing fees, thresholds, and payout rules match configuration
+
+- [x] Public API exposes no RPC credentials or Stratum password.
+- [x] API is read-only; there are no mutation or payout endpoints.
+- [x] CORS is an explicit allowlist and rate limiting is enforced.
+- [x] `X-Forwarded-For` is honored only from configured trusted proxies.
+- [x] Dashboard values come from the live API; offline/error states are
+      explicit.
+- [x] Fees, reward method and payout-disabled status match configuration.
+- [x] No fake Stratum endpoint is rendered. Unconfigured means “Not configured”.
+- [x] Node RPC and pool API ports are not published by the Compose stack.
+- [ ] Independent security review. Not performed.
+- [ ] Threat model validated for public, real-value operation. Not performed.
+- [ ] Caddy security headers/TLS verified at runtime. Caddy is unavailable here.
 
 ## Gate 5 — Deployment
-- [ ] Beta website and compatible services deploy successfully if credentials are available
-- [ ] The persistent Stratum service has a reachable, documented endpoint
-- [ ] Health checks and rollback instructions work
-- [ ] Production remains protected until all production-specific gates pass
 
-## Gate 6 — v1.0.0
-- [ ] Release notes, version identifiers, configuration reference, operator guide, miner setup guide, security notes, and known limitations are complete
-- [ ] All required automated tests pass
-- [ ] Every blocked gate is explicit and justified
-- [ ] The production release is not marked complete if a critical gate remains unverified
+- [x] Base Compose configuration validates with `docker compose config`.
+- [x] Production TLS overlay validates with `docker compose config`.
+- [x] BTCS release is pinned to `31.1.3` with an official SHA256.
+- [x] Persistent volumes, healthchecks, startup ordering and restart policies
+      are defined.
+- [x] Pool and web images are configured to run non-root; node capabilities are
+      dropped.
+- [ ] Images build successfully. Blocked: Docker socket permission.
+- [ ] Containers start and pass healthchecks. Blocked: Docker socket
+      permission.
+- [ ] Caddyfile validates and serves routes/TLS. Blocked: Caddy unavailable.
+- [ ] A public Stratum endpoint resolves and accepts TCP connections. Blocked:
+      no host/DNS/firewall access.
+- [ ] Live cloud deployment exists. Blocked: no credentials or infrastructure.
+- [ ] Rollback procedure exercised. Not possible without a deployment.
+- [ ] Backups and restore drill for the pool database and node data. Not
+      exercised.
 
-### Economics
-- Default pool fee: 2.00%
-- Allowed fee range: 0.00% – 5.00%
-- Fee configurable via BTCS_POOL_FEE environment variable
-- Fee paid to dedicated BTCS_POOL_FEE_ADDRESS
-- Minimum miner payout: 0.01 BTCS
-- Payout check interval: 300 seconds (5 min)
-- Automatic payouts: disabled until verified
+## Gate 6 — Release
 
-### Key Files Changed
-- src/btcs_pool/config.py — pool fee config, validation, payout settings
-- src/btcs_pool/accounting.py — complete payout accounting system with SQLite backend
-- src/btcs_pool/stratum.py — pool fee calculation on block submission
-- RELEASE_CHECKLIST.md — this file
+- [ ] Versioned release notes and operator guide.
+- [ ] Miner setup guide verified against a third-party miner.
+- [ ] All payout gates pass.
+- [ ] All deployment gates pass.
+- [ ] Every blocked gate is either resolved or explicitly accepted by the
+      maintainers.
+- [ ] Public site does not imply live mining, uptime, payouts or mainnet
+      operation.
 
-### Remaining Work (highest priority first)
-1. Complete payout accounting end-to-end tests (share → work → block → reward → fee → miner credits → payouts)
-2. Real miner-to-block end-to-end testing on regtest
-3. Payout security: state machine, idempotency, atomic reservations, threshold/dust checks
-4. Cloudflare deployment readiness: Stratum service hostname/port configuration
-5. API and dashboard: operator endpoints, miner status, dashboard panels
-6. Merged mining investigation (VERIFIED/UNVERIFIED/INCOMPATIBLE statuses)
-7. Staking status documentation (disabled for v1.0.0)
-8. Deployment configuration and environment separation
+## Evidence summary
+
+| Check | Result |
+|---|---|
+| `python3 -m pytest -q tests` | **100 passed** in 34.85s, including real-node E2E |
+| `cd site && npm test` | **8 passed** |
+| `cd site && npm run test:browser` | **7 passed** |
+| `cd site && npm run build` | all ten routes built |
+| Base `docker compose config` | passed |
+| Production overlay `docker compose config` | passed |
+| Docker image build/run | **blocked** (socket permission) |
+| Caddy runtime validation | **blocked** (Caddy unavailable) |
+| Public deployment / DNS / TLS | **not performed** |
+| Payout signing/broadcast/recovery | **not implemented** |
+
+## Economics disclosed by the implementation
+
+- Algorithm: SHA256d.
+- Reward method: difficulty-weighted, per-round PPLNS. No rolling window.
+- Default pool fee: 2.00%; allowed 0.00–5.00%.
+- Minimum payout setting: 0.01 BTCS (advertised only; payouts disabled).
+- Payout interval setting: 300 seconds (advertised only; no executor).
+- Coinbase maturity: 200 confirmations.
+- Automatic payouts: disabled.
+
+## Decision
+
+**Do not release as a paying, public or mainnet pool.** The minimum remaining
+work is a real third-party miner test, an external deployment with runtime
+healthchecks and TLS, a public Stratum endpoint, payout implementation and
+security review.

@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "vite build",
-    "preview": "serve -s _site -l 4173"
+    "preview": "vite preview --port 4173",
+    "test": "node --test tests/static.test.mjs",
+    "test:static": "node --test tests/static.test.mjs",
+    "test:browser": "node --test tests/browser.test.mjs"
   },
-  "dependencies": {
-    "vite": "^5.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "vite": "^5.2.0"
+    "vite": "^7.3.7"
   }
 }

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool help — diagnose Stratum connection, share rejection, miner lookup and readiness problems using real pool status data.">
+    <title>Help &amp; Troubleshooting — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/help.js"></script>
+  </head>
+  <body data-page="help">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+        <a href="../" data-page="overview">Overview</a><a href="../statistics/" data-page="statistics">Statistics</a><a href="../miners/" data-page="miners">Miners</a><a href="../blocks/" data-page="blocks">Blocks</a><a href="../getting-started/" data-page="getting-started">Getting Started</a><a href="../pool/" data-page="pool">Pool</a><a href="../api-docs/" data-page="api-docs">API</a><a href="../status/" data-page="status">Status</a><a href="../help/" data-page="help">Help</a>
+      </nav>
+    </div></header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">HELP &amp; TROUBLESHOOTING</p><h1>Diagnose a connection problem</h1><p>Start with the live state below. Silver Pool only reports an endpoint, node height or readiness value that the API actually returned.</p></div></section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading"><div><p class="eyebrow">CURRENT STATE</p><h2>What the pool reports now</h2><p>If a value says “Unavailable” or “Not configured”, do not substitute a guess from an old guide.</p></div><a class="link-more" href="../status/">Full status page</a></div>
+          <div id="help-state" aria-live="polite"></div>
+          <div class="three-col" style="margin-bottom:1.5rem">
+            <article class="panel"><h3>Stratum endpoint</h3><p class="mono hash" id="help-endpoint">—</p><p class="muted" id="help-endpoint-note">Checking the public configuration…</p></article>
+            <article class="panel"><h3>Pool readiness</h3><p id="help-ready" style="font-weight:800;font-size:1.2rem">—</p><p class="muted" id="help-ready-note">Database, node, Stratum and template checks.</p></article>
+            <article class="panel"><h3>Network and node</h3><p id="help-network" style="font-weight:800;font-size:1.2rem">—</p><p class="muted" id="help-node-note">Live BTCS node sync state.</p></article>
+          </div>
+          <div class="panel" style="margin-bottom:1.5rem">
+            <h3>Connection test</h3>
+            <p class="muted">Once an endpoint is configured, test TCP reachability from the machine running your miner. Replace the host and port only with the values shown above.</p>
+            <pre><code id="help-command">The pool has not configured a public Stratum endpoint.</code></pre>
+            <div class="copy-row"><button class="button button-outline button-small" type="button" data-copy-target="help-command" style="color:var(--ink);border-color:var(--line)">Copy command</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-heading"><div><p class="eyebrow">COMMON PROBLEMS</p><h2>Symptoms and what they mean</h2><p>These are actual rejection reasons and API states produced by this pool, not generic suggestions.</p></div></div>
+          <div class="two-col">
+            <article class="panel"><h3>No Stratum endpoint is shown</h3><p>The operator has not set <code>BTCS_PUBLIC_STRATUM_HOST</code>. The pool may be listening locally, but it is not advertising an address that miners can reach. Do not connect to <code>127.0.0.1</code> from another machine, and do not use a hostname from an old example.</p><p><a href="../getting-started/">Return to the connection guide</a></p></article>
+            <article class="panel"><h3>Connection refused or timed out</h3><p>Check the exact host and port, TCP firewall rules and whether the pool is listening. A DNS name resolving on the web server does not prove that the Stratum port is reachable. Test with <code>nc -vz HOST PORT</code> or <code>telnet HOST PORT</code>.</p></article>
+            <article class="panel"><h3>Authorization failed</h3><p>The username must match <code>ACCOUNT.WORKER</code> using letters, digits, <code>.</code>, <code>_</code>, <code>:</code>, <code>@</code>, <code>+</code> or <code>-</code>, with a maximum of 160 characters. If the operator configured a pool password, the password must match exactly. A blank username is rejected.</p></article>
+            <article class="panel"><h3>Repeated “low-difficulty”</h3><p>The submitted hash did not meet the share target for your session. This is not a block rejection. Confirm the miner is using SHA256d and received <code>mining.set_difficulty</code>; if you requested <code>mining.suggest_difficulty</code>, the pool applies that difficulty to your session.</p></article>
+            <article class="panel"><h3>Repeated “stale-job”</h3><p>The job was built for a previous block tip. After a new block arrives, finish the current job promptly; submissions referencing the old previous block hash are recorded as stale and are not counted as valid work.</p></article>
+            <article class="panel"><h3>“duplicate-share”</h3><p>The same miner, job, extranonce2, ntime and nonce were already submitted. The database rejects the duplicate so it cannot be counted twice. Reconfigure the miner or use a fresh job; do not simply resubmit.</p></article>
+            <article class="panel"><h3>“invalid-extranonce2” or “invalid-hex”</h3><p>The submission did not match the extranonce2 size advertised during subscribe, or a field was not valid hexadecimal. Use the exact extranonce2 size from <code>mining.subscribe</code> and 8-character ntime/nonce fields.</p></article>
+            <article class="panel"><h3>Pool status says “not ready”</h3><p>Read <a href="../status/">Service Status</a>. Readiness requires a healthy database, a connected and synced BTCS node, a listening Stratum server and a fresh <code>getblocktemplate</code> job. Mining values are not inferred while a component is unavailable.</p></article>
+            <article class="panel"><h3>Miner is not found</h3><p>Public miner pages only contain accounts that have authorized at least once and remain in the persistent database. Check the account spelling; worker suffixes are not separate miner accounts. A miner with no accepted shares still appears after authorization.</p></article>
+            <article class="panel"><h3>Balances are displayed but cannot be withdrawn</h3><p>Payouts are disabled in this release. The pool records share weights, block rewards, fees and maturity state, but it does not sign or broadcast miner payments. Do not send a private key, seed phrase or exchange password; none is required.</p></article>
+            <article class="panel"><h3>API returns an error envelope</h3><p>Errors have <code>"ok": false</code> and an <code>error.code</code> such as <code>not_ready</code>, <code>invalid_username</code>, <code>rate_limited</code> or <code>miner_not_found</code>. Use the <a href="../api-docs/">API documentation</a> and the returned HTTP status; do not parse an error as a successful empty result.</p></article>
+            <article class="panel"><h3>Website is up but data is offline</h3><p>The static site can load while the API or node is down. In that case the pages show an offline or error state and clear the live figure rather than presenting a stale or invented number.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="two-col">
+            <article class="panel"><h2>What to send an operator</h2><p>If the checks above do not explain the problem, include:</p><ul class="list-check"><li>The miner software and version.</li><li>The exact rejection message from the miner log.</li><li>The pool endpoint host and port, but never a password or private key.</li><li>The time the problem occurred and your timezone.</li><li>Whether <a href="../status/">Status</a> reported ready at that time.</li></ul></article>
+            <article class="panel panel-dark"><h2 style="color:#fff">What the pool will never ask for</h2><p class="muted">Silver Pool does not need a wallet private key, seed phrase, exchange login or signing credential to accept shares. The Stratum username is a public accounting label. Treat any request for those secrets as fraudulent.</p><p><a href="../pool/">Review pool policy</a> · <a href="../api-docs/">Read the API contract</a></p></article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

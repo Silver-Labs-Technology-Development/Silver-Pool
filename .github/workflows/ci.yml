@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install test dependencies
+        run: python -m pip install --requirement requirements-dev.txt
+      - name: Run unit, API, Stratum and deployment tests
+        run: python -m pytest -q tests
+      # The real-node E2E is skipped unless bitcoinsilverd is installed. It is
+      # run locally against the pinned official release and a throwaway regtest
+      # datadir; CI must not download or start a chain by accident.
+
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Static route and asset tests
+        run: npm run test:static
+      - name: Browser route, history and error-state tests
+        run: npm run test:browser
+      - name: Production multi-page build
+        run: npm run build
+
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Validate Compose configuration
+        run: |
+          docker compose --env-file .env.example \
+            -f deploy/docker-compose.yml config >/dev/null
+      - name: Validate production overlay
+        env:
+          SILVER_POOL_SITE_ADDRESS: pool.invalid
+        run: |
+          docker compose --env-file .env.example \
+            -f deploy/docker-compose.yml \
+            -f deploy/docker-compose.prod.yml config >/dev/null

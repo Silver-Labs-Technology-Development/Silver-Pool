@@ -1,11 +1,12 @@
-# Silver Pool — Cloudflare Pages configuration
-# Deploys the static website (site/_site) to Cloudflare Pages.
-# The Python pool API backend (pool_api_server.py) runs separately;
-# Cloudflare Pages only serves static assets.
+# Silver Pool — optional Cloudflare Pages configuration.
+#
+# This publishes only the static frontend built in `site/_site`. Cloudflare
+# Pages cannot run the Python API, Stratum listener or BTCS node, and no
+# Cloudflare deployment was verified from this repository. The site defaults to
+# a same-origin `/api`; without a reverse proxy to a real pool backend it will
+# show honest offline states. Prefer deploy/docker-compose.yml for the full
+# stack. Keep this file only if a static-only deployment is explicitly wanted.
 
 name = "silver-pool"
 compatibility_date = "2026-10-24"
 pages_build_output_dir = "site/_site"
-
-[vars]
-API_BASE_URL = "/api"

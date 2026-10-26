@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool miner detail — workers, accepted and rejected shares, balances and blocks for a BTCS miner.">
+    <title>Miner detail — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/miner.js"></script>
+  </head>
+  <body data-page="miners">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+        <a href="../" data-page="overview">Overview</a><a href="../statistics/" data-page="statistics">Statistics</a><a href="../miners/" data-page="miners">Miners</a><a href="../blocks/" data-page="blocks">Blocks</a><a href="../getting-started/" data-page="getting-started">Getting Started</a><a href="../pool/" data-page="pool">Pool</a><a href="../api-docs/" data-page="api-docs">API</a><a href="../status/" data-page="status">Status</a><a href="../help/" data-page="help">Help</a>
+      </nav>
+    </div></header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">MINER DETAIL</p><h1>Miner and worker records</h1><p>Public accounting records for one miner account. Worker names are the suffixes after the final dot in a Stratum username.</p></div></section>
+      <section class="section">
+        <div class="container">
+          <form class="search-form" id="miner-search-form" role="search">
+            <label for="miner-search">Miner name</label>
+            <input id="miner-search" name="miner" type="search" placeholder="Miner or wallet.worker" autocomplete="off" maxlength="160">
+            <button class="button button-dark" type="submit">Open miner</button>
+            <a class="button button-outline" href="../miners/" style="color:var(--ink);border-color:var(--line)">All miners</a>
+          </form>
+          <div id="miner-state" aria-live="polite"></div>
+          <div id="miner-content" hidden>
+            <div class="miner-head">
+              <div><p class="eyebrow" style="margin-bottom:0.3rem">MINER</p><h2 id="miner-name">—</h2><p class="miner-meta" id="miner-meta">—</p></div>
+              <div class="status-line"><span class="dot dot-unknown" id="miner-dot"></span><span id="miner-status">—</span></div>
+            </div>
+            <div class="stat-grid cols-4" style="margin-bottom:1.2rem">
+              <article class="stat-card"><p class="label">Available</p><p class="value" id="miner-available">—</p><p class="detail">Mature accounting balance</p></article>
+              <article class="stat-card"><p class="label">Immature</p><p class="value" id="miner-immature">—</p><p class="detail">Awaiting coinbase maturity</p></article>
+              <article class="stat-card"><p class="label">Accepted shares</p><p class="value" id="miner-accepted">—</p><p class="detail" id="miner-rejected">— rejected</p></article>
+              <article class="stat-card"><p class="label">Workers</p><p class="value" id="miner-workers">—</p><p class="detail">Unique worker names</p></article>
+            </div>
+
+            <h2>Workers</h2>
+            <div class="table-wrap" style="margin-bottom:1.6rem"><table>
+              <thead><tr><th>Worker</th><th>Accepted shares</th><th>Created</th><th>Last seen</th></tr></thead>
+              <tbody id="miner-workers-body"><tr><td colspan="4" class="table-empty">No workers.</td></tr></tbody>
+            </table></div>
+
+            <h2>Recent shares</h2>
+            <div class="table-wrap" style="margin-bottom:1.6rem"><table>
+              <thead><tr><th>Job</th><th>Round height</th><th>Difficulty</th><th>Result</th><th>Reason</th><th>Time</th></tr></thead>
+              <tbody id="miner-shares-body"><tr><td colspan="6" class="table-empty">No shares.</td></tr></tbody>
+            </table></div>
+
+            <h2>Blocks found by this miner</h2>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Height</th><th>Block hash</th><th>Reward</th><th>Status</th><th>Confirmations</th><th>Found</th></tr></thead>
+              <tbody id="miner-blocks-body"><tr><td colspan="6" class="table-empty">No blocks.</td></tr></tbody>
+            </table></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

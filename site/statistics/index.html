@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool statistics — accepted shares, hashrate history and pool totals from the live BTCS pool API.">
+    <title>Statistics — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/statistics.js"></script>
+  </head>
+  <body data-page="statistics">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+        <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+          <a href="../" data-page="overview">Overview</a>
+          <a href="../statistics/" data-page="statistics">Statistics</a>
+          <a href="../miners/" data-page="miners">Miners</a>
+          <a href="../blocks/" data-page="blocks">Blocks</a>
+          <a href="../getting-started/" data-page="getting-started">Getting Started</a>
+          <a href="../pool/" data-page="pool">Pool</a>
+          <a href="../api-docs/" data-page="api-docs">API</a>
+          <a href="../status/" data-page="status">Status</a>
+          <a href="../help/" data-page="help">Help</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">POOL STATISTICS</p><h1>Hashrate and share history</h1><p>These charts are computed from accepted share difficulty stored in the pool database. Empty windows are shown as empty, not filled with invented values.</p></div></section>
+      <section class="section">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">LIVE TOTALS</p><h2>Pool at a glance</h2><p>Totals cover the lifetime of this database. Hashrate is an estimate from the last 24 hours of accepted shares.</p></div>
+            <p class="tabs-note" id="stats-updated">Waiting for API…</p>
+          </div>
+          <div id="stats-state" aria-live="polite"></div>
+          <div class="stat-grid cols-4">
+            <article class="stat-card"><p class="label">Accepted shares</p><p class="value" id="stat-accepted">—</p><p class="detail" id="stat-rejected">— rejected</p></article>
+            <article class="stat-card"><p class="label">Share difficulty</p><p class="value" id="stat-difficulty">—</p><p class="detail">Sum of accepted share work</p></article>
+            <article class="stat-card"><p class="label">Hashrate estimate</p><p class="value" id="stat-hashrate">—</p><p class="detail">24-hour rolling estimate</p></article>
+            <article class="stat-card"><p class="label">Registered miners</p><p class="value" id="stat-miners">—</p><p class="detail" id="stat-active">— active in 24h</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">HASHRATE</p><h2>Accepted work over time</h2><p>Each bucket shows estimated hashrate from accepted shares. The pool only reports a bucket when share data exists.</p></div>
+            <div class="segmented" role="group" aria-label="Hashrate history range">
+              <button type="button" data-range="1h">1h</button>
+              <button type="button" data-range="6h">6h</button>
+              <button type="button" data-range="24h" class="is-active">24h</button>
+              <button type="button" data-range="7d">7d</button>
+            </div>
+          </div>
+          <div id="chart-state" aria-live="polite"></div>
+          <div class="chart-wrap">
+            <canvas id="hashrate-chart" role="img" aria-label="Hashrate history chart"></canvas>
+            <div class="chart-empty" id="chart-empty">Waiting for hashrate data…</div>
+            <div class="chart-legend"><span id="chart-window">Window: 24h</span><span id="chart-bucket">Bucket: —</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading"><div><p class="eyebrow">BUCKETS</p><h2>Recent history rows</h2><p>The latest buckets returned by the API, including zero-share buckets.</p></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Bucket start</th><th>Accepted shares</th><th>Difficulty</th><th>Hashrate</th></tr></thead>
+              <tbody id="history-body"><tr><td colspan="4" class="table-empty">Waiting for history…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

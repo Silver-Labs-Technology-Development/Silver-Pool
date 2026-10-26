@@ -1,43 +1,66 @@
-# Silver Pool — Backend Integration Phase
+# Silver Pool — integration and verification status
 
-## Status: **INTEGRATION COMPLETE** ✅
+**Last verified:** 2026-10-26
 
-All components verified and functioning:
+## Classification
 
-### Verified Components:
+**Local regtest prototype.** A real Bitcoin Silver Core `v31.1.3` regtest node,
+the integrated Stratum/API process and the persistent SQLite database were
+exercised end to end on this machine. This repository has **not** been deployed
+to a cloud host or verified as a testnet, regtest-hosted, or mainnet public pool.
+Payouts are disabled.
 
-1. **Python backend on port 8765** — All 10 endpoints serving real data from SQLite database
-2. **Schema fix applied** — `ALTER TABLE shares ADD COLUMN round_id` executed successfully
-3. **Database data confirmed** — `pool.sqlite3` contains 1 miner, 1 share, 1 block
-4. **All 7 pytest tests pass** — `tests/test_api.py` validates structure and schemas
-5. **Frontend build succeeded** — `npm run build` completed via Vite (production build)
-6. **Frontend connects locally** — `http://localhost:8765/api` as configured in `site/site.mjs`
-7. **Cloudflare Pages architecture documented** — `window.API_BASE_URL` must be set for production deployments
+## Verified locally
 
-### API Endpoint Mapping Verification (all 10 matched):
+| Area | Evidence |
+|---|---|
+| Real node connectivity | `getblockchaininfo`, `getblocktemplate ["segwit"]`, wallet creation/loading, `getblockhash` |
+| Block template | Height, previous hash, version, bits, coinbase value, transaction list |
+| Stratum V1 | Subscribe, authorize, difficulty, notify, submit, reconnect, per-session `extranonce1`, miner `extranonce2` |
+| Share handling | Accepted, invalid target, duplicate, stale job, authorization failure, unknown method |
+| Block submission | Real `submitblock` accepted; canonical block hash matched the node at the submitted height |
+| Accounting | Difficulty-weighted per-round PPLNS, exact fee split, immature balance, maturity, orphan reversal, fee ledger |
+| Persistence | New `Database` instance after shutdown still sees the accepted block and rejected stale share |
+| API | Envelopes, request IDs, CORS, rate limiting with trusted-proxy handling, validation, 404/405/500, health/readiness, OpenAPI |
+| Website | Ten direct-load routes, titles/headings/nav, live values, miner search, back/forward/reload, mobile menu, API-error states |
+| Build | Vite production build emits all ten routes and hashed assets |
+| Deployment files | Base and production Compose configurations pass `docker compose config`; pinned BTCS release SHA256 is checked |
 
-| Frontend | Backend Route | Status |
-|---|---|---|
-| `/pool/status` | `GET /api/pool/status` | ✅ |
-| `/pool/statistics` | `GET /api/pool/statistics` | ✅ |
-| `/pool/history/hashrate?range=24h` | `GET /api/pool/history/hashrate` | ✅ |
-| `/pool/miners` | `GET /api/pool/miners` | ✅ |
-| `/pool/miner/{username}` | `GET /api/pool/miner/{username}` | ✅ |
-| `/pool/miner/{username}/shares` | `GET /api/pool/miner/{username}/shares` | ✅ |
-| `/pool/blocks/recent` | `GET /api/pool/blocks/recent` | ✅ |
-| `/health` | `GET /api/health` | ✅ |
+The last full Python run was **100 passed** (including the real-node E2E).
+The static website suite was **8 passed** and the Chrome/CDP browser suite was
+**7 passed**. Exact commands and limitations are in
+[`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
 
-### Runtime Data Verification (sample outputs):
+## Not verified / blocked
 
-- `pool/status`: total_miners=1, total_shares=1, total_blocks=1, database_healthy=true, available=true
-- `pool/statistics`: total_miners=1, total_shares=1, total_blocks=1, database_healthy=true, available=true
-- `pool/history/hashrate?range=24h`: range=24h, history=[], available=true
-- `pool/miners`: miners=["miner1"], available=true
-- `pool/miner/miner1`: miner status with satoshi totals
-- `pool/miner/miner1/shares`: 1 share record (job_id=job1, accepted=true)
-- `pool/blocks/recent`: 1 block (height=1, mature, miner=miner1)
-- `health`: status=ok, service=silver-pool, database=true
+| Item | Blocker |
+|---|---|
+| Docker image build and container runtime | The Docker socket is owned by `root:docker`; the current user is not in the `docker` group and `sudo` requires a password. Compose config validation only. |
+| Caddyfile runtime validation | Caddy is not installed; the apt package download timed out/incomplete. |
+| Live cloud deployment | No provider credentials, host, DNS or firewall access. |
+| Public Stratum endpoint | `BTCS_PUBLIC_STRATUM_HOST` is unset; no externally reachable TCP endpoint exists. |
+| Mainnet pool | No mainnet node, funding, operational review or public infrastructure. |
+| GitHub Pages deployment | Workflow is configured but no Actions run or live Pages URL was verified. Pages is static-only and cannot host the API or Stratum. |
+| Payouts | Signing, broadcasting, confirmation policy, operator authorization and recovery are not implemented. |
 
-### Next Steps (if any):
-- For Cloudflare Pages production deployment: set `window.API_BASE_URL` to the full backend URL
-- Consider adding more miners/shares/blocks to the database for load testing
+## Reproduce the verification
+
+```sh
+python3 -m pytest -q tests
+
+cd site
+npm ci
+npm test
+npm run test:browser
+npm run build
+
+cd ..
+
+docker compose --env-file .env.example -f deploy/docker-compose.yml config >/dev/null
+SILVER_POOL_SITE_ADDRESS=pool.invalid docker compose --env-file .env.example \
+  -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml config >/dev/null
+```
+
+The real-node E2E test skips only when `bitcoinsilverd` is unavailable. It
+creates a throwaway datadir and random loopback ports; it does not touch
+developer chain data, wallets or credentials.

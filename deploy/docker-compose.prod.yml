@@ -1,0 +1,16 @@
+# Production overlay for a host that terminates TLS in this Compose stack.
+#
+#   cp .env.example .env
+#   # set SILVER_POOL_SITE_ADDRESS=pool.your-domain and DNS A/AAAA records
+#   docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
+#
+# Caddy obtains and renews the certificate for SILVER_POOL_SITE_ADDRESS. The
+# pool API and BTCS RPC ports are still never published.
+services:
+  web:
+    environment:
+      SILVER_POOL_SITE_ADDRESS: ${SILVER_POOL_SITE_ADDRESS:?set SILVER_POOL_SITE_ADDRESS to the public hostname}
+    ports: !override
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"

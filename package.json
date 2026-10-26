@@ -5,7 +5,11 @@
   "description": "Silver Pool — Bitcoin Silver mining pool",
   "scripts": {
     "build": "cd site && npm ci && npm run build",
-    "deploy": "wrangler pages deploy site/_site --project-name silver-pool"
+    "site:build": "cd site && npm run build",
+    "site:test": "cd site && npm test",
+    "site:test:browser": "cd site && npm run test:browser",
+    "test": "python3 -m pytest -q tests",
+    "deploy:site": "wrangler pages deploy site/_site --project-name silver-pool"
   },
   "devDependencies": {
     "wrangler": "^4.152.0"

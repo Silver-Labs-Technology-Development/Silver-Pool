@@ -1,5 +1,15 @@
 # Repository Audit — Silver Pool
 
+> **Historical snapshot — superseded by
+> [`docs/IMPLEMENTATION-STATUS.md`](IMPLEMENTATION-STATUS.md) (2026-10-26).**
+>
+> The file locations and Git state below are from the earlier audit. References
+> to `site/projects.mjs`, `site/site.mjs` and `site/tests/site.test.mjs` are
+> obsolete: those single-page files were removed and replaced by the ten-route
+> site in `site/`. Do not use this document as current build or deployment
+> guidance.
+
+
 This document records the state of the Silver Pool project and its repository boundaries as of the audit date. It is intended to prevent misplacement of pool content and to serve as the reference for the repair-and-implementation work.
 
 ## Source Locations (as of audit)

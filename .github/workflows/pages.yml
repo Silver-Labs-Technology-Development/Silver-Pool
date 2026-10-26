@@ -1,4 +1,9 @@
-name: Build and deploy Silver Pool website
+name: Build and deploy static Silver Pool website
+
+# This workflow publishes the multi-page frontend to GitHub Pages only.
+# The BTCS node, Stratum listener and HTTP API are not hosted on GitHub Pages;
+# the deployed site will show honest offline states unless a same-origin API is
+# reverse-proxied separately. See deploy/docker-compose.yml for the full stack.
 
 on:
   push:
@@ -28,15 +33,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Test website
-        run: |
-          node --test tests/*.test.mjs
-          node --check site.mjs
-          node --check projects.mjs
-      - name: Build frontend
+      - name: Static route and asset tests
+        run: npm run test:static
+      - name: Browser route, history and error-state tests
+        run: npm run test:browser
+      - name: Build frontend for the repository subpath
+        env:
+          SITE_BASE: /Silver-Pool/
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
