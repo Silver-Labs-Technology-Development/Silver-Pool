@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101315">
+    <meta name="description" content="Silver Pool blocks — BTCS blocks found by the pool, confirmation state, rewards and miners.">
+    <title>Blocks — Silver Pool</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101315'/%3E%3Cpath d='M44 17H25a11 11 0 0 0 0 22h14a4 4 0 0 1 0 8H18' fill='none' stroke='%23e4c778' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles.css">
+    <script type="module" src="../assets/blocks.js"></script>
+  </head>
+  <body data-page="blocks">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="../" aria-label="Silver Pool home"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle><span class="sr-only">Toggle navigation</span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="Primary navigation" data-nav>
+        <a href="../" data-page="overview">Overview</a><a href="../statistics/" data-page="statistics">Statistics</a><a href="../miners/" data-page="miners">Miners</a><a href="../blocks/" data-page="blocks">Blocks</a><a href="../getting-started/" data-page="getting-started">Getting Started</a><a href="../pool/" data-page="pool">Pool</a><a href="../api-docs/" data-page="api-docs">API</a><a href="../status/" data-page="status">Status</a><a href="../help/" data-page="help">Help</a>
+      </nav>
+    </div></header>
+
+    <main id="main">
+      <section class="page-hero"><div class="container"><p class="eyebrow">BLOCKS</p><h1>Blocks found by Silver Pool</h1><p>Every block candidate accepted by the BTCS node is recorded here. Confirmation counts are derived from the node's current height; immature blocks are not spendable yet.</p></div></section>
+      <section class="section">
+        <div class="container">
+          <div class="filter-row">
+            <label for="block-status" class="muted">Status</label>
+            <select id="block-status" class="search-form" style="min-height:44px;border:1px solid var(--line);border-radius:9px;padding:0.55rem 0.8rem;background:#fff">
+              <option value="all">All blocks</option>
+              <option value="immature">Immature</option>
+              <option value="mature">Mature</option>
+              <option value="orphaned">Orphaned</option>
+            </select>
+            <button class="button button-dark button-small" id="blocks-refresh" type="button">Refresh</button>
+            <span class="muted" id="blocks-count">Waiting for API…</span>
+          </div>
+          <div id="blocks-state" aria-live="polite"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Height</th><th>Block hash</th><th>Miner</th><th>Reward</th><th>Status</th><th>Confirmations</th><th>Found</th></tr></thead>
+              <tbody id="blocks-body"><tr><td colspan="7" class="table-empty">Waiting for block data…</td></tr></tbody>
+            </table>
+          </div>
+          <p class="muted" style="margin-top:1rem">A “mature” block has reached the configured coinbase maturity. “Orphaned” means the node no longer reports that hash at the recorded height. The pool does not link to an external explorer because no canonical BTCS explorer endpoint is configured here.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">S</span><span class="brand-name">SILVER <span>POOL</span></span></a><p>Bitcoin Silver mining infrastructure by Silver Labs Technology &amp; Development. Payouts remain disabled until the full reward and signing path is verified.</p></div>
+      <div><h2>Pool</h2><ul><li><a href="../statistics/">Statistics</a></li><li><a href="../miners/">Miners</a></li><li><a href="../blocks/">Blocks</a></li><li><a href="../pool/">Configuration</a></li></ul></div>
+      <div><h2>Miners</h2><ul><li><a href="../getting-started/">Getting started</a></li><li><a href="../help/">Troubleshooting</a></li><li><a href="../api-docs/">API documentation</a></li><li><a href="../status/">Service status</a></li></ul></div>
+      <div><h2>Source</h2><ul><li><a href="https://github.com/Silver-Labs-Technology-Development/Silver-Pool" rel="noopener">GitHub repository</a></li><li><a href="https://github.com/bitcoin-silver/core" rel="noopener">Bitcoin Silver Core</a></li></ul></div>
+    </div><div class="footer-bottom"><span>Silver Pool · SHA256d · BTCS</span><span>Live data only. No placeholder pool statistics.</span></div></div></footer>
+  </body>
+</html>

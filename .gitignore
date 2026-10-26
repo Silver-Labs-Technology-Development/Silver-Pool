@@ -50,9 +50,9 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Local chain and node state
-.regtest/
-testnet*/
-mainnet/
-blocks/
-chainstate/
+# Local chain and node state (root-anchored so site/blocks stays tracked)
+/.regtest/
+/testnet*/
+/mainnet/
+/blocks/
+/chainstate/
