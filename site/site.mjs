@@ -2,6 +2,8 @@ import { projects } from './projects.mjs'
 
 // API configuration - configurable base URL for deployed environments
 // Can be overridden at runtime via window.API_BASE_URL before this module loads
+// For Cloudflare Pages production, set window.API_BASE_URL to the full backend URL
+// e.g., window.API_BASE_URL = 'https://your-domain.com/api'
 const API_BASE_URL = (typeof window !== 'undefined' && window.API_BASE_URL) || '/api'
 
 // Helper: show a loading state inside a container
