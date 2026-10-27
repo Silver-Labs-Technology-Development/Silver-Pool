@@ -29,7 +29,7 @@ services:
     ports:
       - "10566:10566"
     healthcheck:
-      test: ["/CMD", "/usr/local/bin/btcs-node-healthcheck"]
+      test: ["CMD", "/usr/local/bin/btcs-node-healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 10
