@@ -1,0 +1,30 @@
+[Unit]
+Description=Silver Pool BTCS mainnet Stratum and API backend
+Documentation=file://@REPO@/docs/MAINNET-LAUNCH.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=@REPO@
+EnvironmentFile=@REPO@/.env.native
+Environment=PYTHONPATH=@REPO@/src
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=@VENV@/bin/python -m btcs_pool.server
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@REPO@/data @REPO@/logs @REPO@/run
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=default.target

@@ -7,6 +7,7 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.native.example
 *.log
 .DS_Store
 __pycache__/
@@ -29,6 +30,9 @@ seed*
 data/
 runtime/
 tmp/
+logs/
+run/
+backups/
 *.sqlite
 *.sqlite3
 *.db

@@ -9,18 +9,46 @@
 |---|---|
 | Product | Silver Pool |
 | Chain | Bitcoin Silver (BTCS), SHA256d |
-| Verified stage | Local regtest prototype |
-| Real node used | Bitcoin Silver Core `v31.1.3` |
-| Production / mainnet | **No** |
-| Pool backend deployment | **No** |
+| Verified stage | Native BTCS mainnet backend, tested locally |
+| Real node used | Bitcoin Silver Core `v31.1.3`, mainnet, synced |
+| Production / mainnet | **Local mainnet backend only; no public deployment** |
+| Pool backend deployment | Native systemd user services on this host |
+| External Stratum connectivity | **No** |
+| Third-party miner test | **No** |
 | Static frontend deployment | GitHub Pages (verified) |
 | Payouts | **Disabled** |
 | Repository | `https://github.com/Silver-Labs-Technology-Development/Silver-Pool` |
 
-The pool verification below was performed on this machine against a throwaway
-regtest datadir. It is not evidence of cloud-hosted, testnet, regtest-hosted, or
-mainnet pool operation. The static website is deployed separately to GitHub
-Pages and has no API, Stratum or node behind it.
+The pool was exercised on this machine in two ways: a native mainnet deployment
+against the existing synced node, and a throwaway regtest E2E run that submits a
+real block. Neither is evidence of cloud-hosted, testnet or publicly reachable
+mainnet operation. The static website is deployed separately to GitHub Pages and
+has no API, Stratum or node behind it.
+
+## Native mainnet verification (2026-10-26)
+
+| Check | Evidence |
+|---|---|
+| Node | BTCS Core `/BitcoinSilver:31.1.3/`, chain `main`, 10 peers, fully synced |
+| RPC | Authenticated over loopback from the active node datadir; never exposed |
+| Template | Current height, `bits`, coinbase value, witness commitment, transactions |
+| Coinbase | Valid 22-byte P2WPKH script from the existing `pool` wallet |
+| Stratum | Subscribe, `extranonce1`, difficulty, authorize, notify |
+| Shares | Accepted, duplicate rejected, invalid rejected, stale rejected, unauthorized rejected, wrong password rejected |
+| Accounting | API showed accepted and rejected shares with no double credit |
+| Restart | Shares persisted; replay rejected; API still reported the same state |
+| Block submission | **0** attempts; the harness refuses `submitblock` |
+| Production DB | Empty ledger at `data/mainnet/pool.sqlite3`; no test shares or blocks |
+| Backup/restore | Online backup, SHA-256 manifest, integrity check, isolated restore |
+| Website | Ten routes HTTP 200; live page read real node height and readiness |
+| Payouts | `BTCS_AUTO_PAYOUTS=false`; API reports disabled |
+
+The mainnet smoke test uses an isolated temporary database, ephemeral ports and
+a `NoSubmitRPC` wrapper. It never writes to the production database, never
+submits a block and never moves funds. It is not a substitute for a real
+third-party miner or an external connectivity test. The full runbook is in
+[`MAINNET-LAUNCH.md`](MAINNET-LAUNCH.md); release gates are in
+[`../LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md).
 
 ## Implemented backend
 
@@ -141,7 +169,7 @@ Command:
 python3 -m pytest -q tests
 ```
 
-Result: **100 passed, 0 failed, 0 skipped** in 34.85 seconds (2026-10-26).
+Result: **112 passed, 0 failed, 0 skipped** in 42.36 seconds (2026-10-26).
 The real-node E2E ran because `bitcoinsilverd` was available.
 
 Coverage by file:
@@ -157,7 +185,15 @@ Coverage by file:
 | `test_stratum.py` | Subscribe/authorize/job/extranonce; authorization failures and unknown methods; difficulty/share/duplicate; invalid share classes; stale after tip change; accepted block submission; rejected `submitblock`; shutdown; reconnect |
 | `test_api.py` | Envelopes/request IDs/headers; online status and payout flags; readiness success/failure; degraded liveness; miners/detail/search; statistics/blocks/hashrate/round/fee ledger; secret-free config; CORS; rate limit; trusted proxy; 404/405/500 |
 | `test_deployment.py` | Compose services/volumes/ordering/healthchecks/restart; RPC/API not published; production overlay; pinned checksum; non-root images; Caddy routing/headers; placeholder env; `.dockerignore` |
+| `test_native_deployment.py` | Native env placeholders; executable/parseable scripts; unit hardening and entrypoints; Git ignore rules; tracked-tree secret scan; no-submit guard; site server env support |
 | `test_e2e_regtest.py` | Real daemon, 10 generated blocks, real template, Stratum subscribe/authorize/notify, block found and accepted at height 11, canonical hash match, immature accounting, duplicate, stale, API visibility, restart persistence |
+
+The separate native mainnet smoke (`./deploy/native/verify-mainnet.sh`) passed
+**33 checks** against the live synced node with a throwaway database and
+**0 block submissions**. It covers real mainnet templates, subscription,
+difficulty, authorization, valid/duplicate/invalid/stale/unauthorized shares,
+wrong-password rejection, API accounting, restart persistence and replay
+rejection. It does not submit a block or prove external connectivity.
 
 ### Website
 
@@ -208,6 +244,26 @@ Both pass. This validates interpolation and schema, not container runtime.
 
 ## Deployment state
 
+### Native mainnet services (current)
+
+The active deployment uses the existing synced node and two systemd user
+services:
+
+- `silver-pool.service`: integrated Stratum + API process from `.venv`
+- `silver-pool-web.service`: static `site/_site` server and `/api` proxy
+- API `127.0.0.1:8765`, website `127.0.0.1:8080`, Stratum `0.0.0.0:3333`
+- database `data/mainnet/pool.sqlite3`, empty production ledger
+- `.env.native` mode `0600`, Git-ignored, not committed
+- `NoNewPrivileges`, `PrivateTmp`, `ProtectSystem=strict`,
+  `ProtectHome=read-only`, explicit write paths
+- backups to `backups/` with manifest, SHA-256 and integrity check
+- payouts disabled in config, API and database state
+
+The node was not restarted, moved or reconfigured. Public Stratum connectivity,
+public API/site hosting and TLS are not configured.
+
+### Compose stack (alternative, unverified at runtime)
+
 The Compose stack is complete in the repository:
 
 - official BTCS Core `31.1.3` release URL and SHA256
@@ -225,7 +281,8 @@ the current user is not in the `docker` group, and `sudo` requires a password.
 Caddy is not installed; the package download timed out and the partial `.deb`
 could not be extracted. Therefore container startup, healthchecks, volume
 permissions, RPC connectivity from the pool container, Caddy routing and TLS
-remain unverified.
+remain unverified. The Compose stack creates a separate node and volumes and
+must not be pointed at the live node datadir.
 
 The static frontend, by contrast, is deployed and verified on GitHub Pages. That
 is a static-only deployment: it has no pool backend, database, API or Stratum
@@ -235,15 +292,17 @@ listener. The site therefore shows offline states rather than live pool data.
 
 | Item | State |
 |---|---|
-| Live pool backend deployment | Blocked: no provider credentials, host, DNS or firewall access |
-| Public Stratum endpoint | Blocked: no public host/port; `BTCS_PUBLIC_STRATUM_HOST` unset |
-| Mainnet pool | Blocked: no mainnet node, funding, operations or public infrastructure |
-| Docker build/runtime | Blocked by socket permissions |
-| Caddy runtime | Blocked: Caddy unavailable |
-| Payouts | Disabled by design; signing/broadcast/confirmation/recovery not implemented |
+| Public Stratum endpoint | Blocked: host is NAT/tethered; no inbound forwarding, public DNS or external TCP test |
+| Third-party miner test | Blocked: no external endpoint and no cgminer/BFGMiner/cpuminer installed |
+| Public API/site hosting and TLS | Blocked: no public host or reverse proxy |
+| Durable user services | `Linger=no`; enabling linger requires administrator action |
+| Payouts | Disabled by design; signing/broadcast/confirmation/idempotency/recovery not implemented |
+| Real-chain reorg | Unit-level reconciliation only; no live reorg exercised |
 | Rolling-window PPLNS | Not implemented; current model is per-round difficulty-weighted |
 | Vardiff | Not implemented; static per-session difficulty with optional miner suggestion |
 | HA / multi-node database | Not supported; SQLite single-writer design |
+| Docker build/runtime | Blocked by socket permissions |
+| Caddy runtime | Blocked: Caddy unavailable |
 | Security audit | Not performed |
 
 ## Historical documents

@@ -3,9 +3,14 @@ import { readFile } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
-const port = Number(process.env.PORT ?? 4173)
-const apiProxy = new URL(process.env.API_PROXY ?? 'http://127.0.0.1:8765')
+const defaultRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
+const root = resolve(process.env.SITE_ROOT || defaultRoot)
+const port = Number(process.env.PORT ?? process.env.SILVER_POOL_HTTP_PORT ?? 4173)
+const host = process.env.HOST || process.env.SILVER_POOL_HTTP_BIND || '127.0.0.1'
+const defaultApiProxy = `http://${process.env.BTCS_POOL_API_HOST || '127.0.0.1'}:${
+  process.env.BTCS_POOL_API_PORT || 8765
+}`
+const apiProxy = new URL(process.env.API_PROXY ?? defaultApiProxy)
 const contentTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.html', 'text/html; charset=utf-8'],
@@ -152,8 +157,8 @@ const server = createServer(async (request, response) => {
   await serveFile(request, response, pathname)
 })
 
-server.listen(port, '127.0.0.1', () => {
+server.listen(port, host, () => {
   process.stdout.write(
-    `Silver Pool website: http://127.0.0.1:${port}/ (API proxy: ${apiProxy.origin})\n`,
+    `Silver Pool website: http://${host}:${port}/ (API proxy: ${apiProxy.origin})\n`,
   )
 })

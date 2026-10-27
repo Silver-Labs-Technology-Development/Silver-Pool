@@ -1,0 +1,26 @@
+[Unit]
+Description=Silver Pool static website and local API proxy
+Documentation=file://@REPO@/docs/MAINNET-LAUNCH.md
+After=network.target silver-pool.service
+Wants=silver-pool.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=@REPO@
+EnvironmentFile=@REPO@/.env.native
+Environment=SITE_ROOT=@REPO@/site/_site
+ExecStart=@NODE@ @REPO@/site/scripts/serve.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=default.target

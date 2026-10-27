@@ -12,7 +12,7 @@
 "Silver Pool — Multi-Coin Mining Infrastructure"
 
 Capability indicator:
-- Bitcoin Silver (BTCS): verified implementation on regtest network
+- Bitcoin Silver (BTCS): verified implementation; local mainnet backend tested; public endpoint not yet verified
 - Other coins: "Planned" or "Integration not yet available" until their complete integration is tested.
 
 ## Pool Fee Model
@@ -48,26 +48,25 @@ Eligible SilvEx trading-fee revenue attributable to defined BTCS markets may con
 
 Silver Pool is a Bitcoin Silver (BTCS) SHA256d mining pool. It runs a Stratum V1
 listener and a read-only HTTP API in one Python process, persists accounting in
-SQLite, serves a ten-page static website, and ships a Docker Compose stack that
-runs BTCS Core, the pool and Caddy.
+SQLite, serves a ten-page static website, and ships both a native systemd
+deployment and a Docker Compose stack.
 
-> **Status as of 2026-10-26: local regtest prototype, not a production or
-> mainnet pool. Payouts are disabled.**
+> **Status as of 2026-10-26: local BTCS mainnet deployment verified; not
+> publicly reachable. Payouts are disabled.**
 >
-> The complete Stratum → share → block → `submitblock` flow has been verified
-> locally against a real Bitcoin Silver Core `v31.1.3` regtest node. A real
-> block was accepted and persisted; after shutdown, a reopened database still
-> contained the accepted block and the rejected stale share.
+> The backend and website run as native systemd user services against the
+> existing synced Bitcoin Silver Core `v31.1.3` mainnet node. Real mainnet
+> templates, Stratum authentication, valid/duplicate/invalid/stale share
+> handling, API accounting, restart persistence and backup/restore were verified
+> locally with an isolated database. The verification harness made **zero block
+> submissions**. The production ledger is empty.
 >
-> The static frontend is deployed to GitHub Pages at
-> <https://silver-labs-technology-development.github.io/Silver-Pool/>. That host
-> serves no API or Stratum service, so the live site shows explicit offline
-> states. No cloud host for the pool backend, public Stratum endpoint, public
-> DNS name for the API, or mainnet node has been provisioned or verified. The
-> Compose files validate, but the images could not be built in this environment
-> because the Docker daemon socket is not accessible to the current user. See
-> [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md) for the full
-> evidence and blockers.
+> Public Stratum connectivity, a third-party miner test, public TLS hosting and
+> payouts are **not** verified or implemented. No public endpoint is advertised.
+> The static frontend on GitHub Pages serves no API or Stratum service, so it
+> shows explicit offline states. See
+> [`docs/MAINNET-LAUNCH.md`](docs/MAINNET-LAUNCH.md) for the runbook and
+> [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md) for the open gates.
 
 ## What is implemented
 
@@ -79,7 +78,7 @@ runs BTCS Core, the pool and Caddy.
 | Accounting | SQLite WAL with ordered migrations; miner/worker records; difficulty-weighted per-round PPLNS; fee ledger; maturity and orphan reconciliation |
 | HTTP API | Consistent `{"ok": ...}` envelope, request IDs, CORS allowlist, per-client rate limiting, validation, health and readiness |
 | Website | Ten real pages: Overview, Statistics, Miners, Miner detail, Blocks, Getting Started, Pool, API Docs, Status, Help |
-| Deployment | Three-service Compose stack, pinned and checksum-verified official BTCS release, persistent volumes, healthchecks, restart policies, private RPC, Caddy TLS overlay |
+| Deployment | Native hardened systemd user services against an existing node, plus a three-service Compose alternative with pinned/checksum-verified BTCS release, persistent volumes, healthchecks, restart policies, private RPC and a Caddy TLS overlay |
 
 The pool never invents statistics. If the API or node is unavailable, the site
 shows an explicit offline/unknown state. If no public Stratum host is
@@ -93,7 +92,49 @@ endpoint.
 - Bitcoin Silver Core `v31.1.3` binaries (`bitcoinsilverd`,
   `bitcoinsilver-cli`) for a real node and the end-to-end test
 
-## Quick start (local regtest)
+## Quick start (native BTCS mainnet)
+
+This is the launch path for an existing synced node. It does not create or
+restart the node, and it never enables payouts. Full instructions are in
+[`docs/MAINNET-LAUNCH.md`](docs/MAINNET-LAUNCH.md).
+
+### 1. Prepare the environment
+
+```sh
+cd ~/Silver-Labs/Silver-Pool
+cp .env.native.example .env.native
+chmod 600 .env.native
+${EDITOR:-vi} .env.native
+```
+
+Set `BTCS_RPC_USER`/`BTCS_RPC_PASSWORD` from the existing node config, exactly
+one of `BTCS_POOL_ADDRESS` or `BTCS_POOL_SCRIPT_PUBKEY`, and a long random
+`BTCS_STRATUM_PASSWORD`. Keep `BTCS_AUTO_PAYOUTS=false`.
+
+### 2. Install, verify and start
+
+```sh
+./deploy/native/install.sh --install-units
+./deploy/native/verify-mainnet.sh
+./deploy/native/start.sh
+./deploy/native/status.sh
+```
+
+`verify-mainnet.sh` uses a throwaway database and ephemeral ports, exercises
+real mainnet templates and Stratum share handling, and refuses every
+`submitblock` call. It is not an external connectivity test.
+
+### 3. Open the site
+
+The local site is <http://127.0.0.1:8080/>; the API is
+<http://127.0.0.1:8765/>. Both bind to loopback by default. The site reports
+Stratum as “Not configured” until a public endpoint has actually been tested
+and `BTCS_PUBLIC_STRATUM_HOST` is set.
+
+## Local development (regtest)
+
+The regtest flow below is for development and automated tests. It does not
+describe the current mainnet deployment.
 
 ### 1. Start a throwaway BTCS regtest node
 
@@ -184,7 +225,14 @@ export BTCS_PUBLIC_STRATUM_PORT=3333
 ```
 
 Without that variable, the API returns `stratum.endpoint: null` and the site
-shows “Not configured”. This checkout does **not** configure a public endpoint.
+shows “Not configured”. This checkout does **not** configure a public endpoint
+because no external TCP path has been tested.
+
+At verification time the native deployment bound Stratum on
+`0.0.0.0:3333` for LAN access. The local endpoint was
+`stratum+tcp://127.0.0.1:3333`; the private LAN address is assigned by DHCP and
+is not published here. Neither is a public endpoint, and no third-party miner
+has connected.
 
 Miner usernames use `account` or `account.worker`. The account is the unit that
 owns balances; the worker is the suffix after the final dot. If
@@ -198,8 +246,9 @@ miner -o stratum+tcp://<configured-host>:<configured-port> -u account.worker -p 
 
 ## HTTP API
 
-The API is read-only and unauthenticated; the deployment keeps it on the private
-Compose network behind Caddy. It uses one envelope for success and error
+The API is read-only and unauthenticated. The native deployment keeps it on
+loopback behind the local website proxy; the Compose deployment keeps it on the
+private network behind Caddy. It uses one envelope for success and error
 responses:
 
 ```json
@@ -240,8 +289,9 @@ ignored so clients cannot spoof new buckets. CORS is an explicit allowlist via
 
 ## Configuration
 
-The full deployment template is [`.env.example`](.env.example). Important
-variables:
+The full Compose deployment template is [`.env.example`](.env.example); the
+native mainnet template is [`.env.native.example`](.env.native.example).
+Important variables:
 
 | Variable | Default | Notes |
 |---|---|---|
@@ -271,7 +321,30 @@ operate this pool as a paying pool.
 
 ## Deployment
 
-The stack is in [`deploy/`](deploy):
+### Native systemd user services (current mainnet path)
+
+The running deployment uses [`deploy/native/`](deploy/native):
+
+- `silver-pool.service` — integrated Stratum + HTTP API process
+- `silver-pool-web.service` — static site and `/api` proxy
+
+It targets the existing synced node over loopback RPC and never creates another
+node or datadir. The units harden the services with `NoNewPrivileges`,
+`PrivateTmp`, `ProtectSystem=strict`, `ProtectHome=read-only` and explicit write
+paths. Setup, verification, backup/restore, upgrade and the external
+connectivity blocker are documented in
+[`docs/MAINNET-LAUNCH.md`](docs/MAINNET-LAUNCH.md).
+
+```sh
+./deploy/native/preflight.sh
+./deploy/native/verify-mainnet.sh
+./deploy/native/start.sh
+./deploy/native/status.sh
+```
+
+### Compose stack (alternative)
+
+The Compose stack is also in [`deploy/`](deploy):
 
 - `node`: official BTCS Core `v31.1.3`, pinned tarball SHA256, persistent
   `node-data` volume, P2P published, RPC private to the Compose network.
@@ -297,9 +370,8 @@ docker compose --env-file .env \
 Both Compose configurations pass `docker compose config`. The images have not
 been built or run here because `/var/run/docker.sock` requires membership in the
 `docker` group, which this environment lacks. Caddy is not installed, so the
-Caddyfile has not been runtime-validated. See
-[`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md) for the exact
-blockers.
+Caddyfile has not been runtime-validated. Do not run this stack against the live
+node datadir; it creates a separate node and volumes.
 
 GitHub Pages hosts only the static frontend. It has no API or Stratum service;
 without a same-origin `/api` reverse proxy the deployed site shows explicit
@@ -315,6 +387,9 @@ over HTTPS; the pool backend is not deployed there.
 # Python unit, API, Stratum, persistence, deployment and real-node E2E tests
 python3 -m pytest -q tests
 
+# Native packaging, env/unit hardening and secret-scan tests
+python3 -m pytest -q tests/test_native_deployment.py
+
 # Website static checks, browser navigation/error-state tests and build
 cd site
 npm ci
@@ -326,33 +401,41 @@ npm run build
 The real-node E2E test starts `bitcoinsilverd` with a throwaway regtest datadir.
 It auto-detects `bitcoinsilverd` on `PATH`, then falls back to
 `/home/user/Silver-Labs/btcs-core/build/bin/bitcoinsilverd`; override with
-`BTCS_DAEMON`. It skips only when no daemon is available. Current verified
-results are recorded in
-[`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
+`BTCS_DAEMON`. It skips only when no daemon is available. The separate
+`./deploy/native/verify-mainnet.sh` test targets the live mainnet node with a
+throwaway database and never submits a block. Current verified results are
+recorded in [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md) and
+[`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md).
 
 ## Repository layout
 
 ```text
 .
 ├── src/btcs_pool/          # block, RPC, node monitor, DB, accounting, Stratum, API, server
-├── tests/                  # unit, integration, deployment and real-regtest E2E tests
+├── tests/                  # unit, integration, native packaging and real-regtest E2E tests
 ├── site/                   # ten-page Vite website, shared JS/CSS, static and browser tests
+├── deploy/native/          # native systemd deployment, preflight, smoke, backup and restore
 ├── deploy/                 # node, pool and web images, Compose files, Caddy config
-├── docs/                   # architecture, implementation status, PPLNS notes, audits
+├── docs/                   # architecture, mainnet launch, implementation status, PPLNS notes
 ├── .github/workflows/      # CI and static Pages build
-├── .env.example            # deployment template; placeholders only
-├── requirements.txt
+├── .env.example            # Compose deployment template; placeholders only
+├── .env.native.example     # native deployment template; placeholders only
+├── requirements.lock       # pinned native Python runtime dependencies
 └── package.json            # root test/build aliases
 ```
 
 ## Known limitations
 
-- **No live pool backend deployment.** The static frontend is live on GitHub
-  Pages, but no cloud host, DNS, firewall or public Stratum TCP endpoint for the
-  node/pool/API stack has been provisioned or verified.
-- **No mainnet operation.** The verified chain is a temporary local regtest
-  node. Mainnet would additionally require operational review, monitoring,
-  backups and a public endpoint.
+- **No public pool endpoint.** The native backend is running against the
+  mainnet node on this host, but no external Stratum TCP path, public DNS name,
+  TLS terminator or API/site hosting has been provisioned or verified.
+- **No externally verified mainnet mining.** Real mainnet templates and share
+  handling were tested locally with an isolated database; no third-party miner
+  has connected and no mainnet block has been submitted. The harness made zero
+  block submissions by design.
+- **Durable supervision needs an administrator.** The systemd units are user
+  services. With `Linger=no` they stop at logout; enabling linger is a manual
+  host change that has not been made.
 - **Payouts are disabled.** Reward accounting and maturity accounting are
   tested, but signing, broadcasting, confirmations, recovery and payment tests
   are not implemented.
