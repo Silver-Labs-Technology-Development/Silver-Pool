@@ -149,14 +149,10 @@ current job and a fresh template all pass. The website at
 ## Miner connection
 
 The website only advertises a public endpoint when `BTCS_PUBLIC_STRATUM_HOST`
-is non-empty. It is empty, so the site correctly says “Not configured.” The
-listener is still reachable on private interfaces for a LAN test.
+is non-empty. It is empty, so the site correctly says “Not configured.”
 
-Verified local endpoint (this host only):
-
-```text
-stratum+tcp://127.0.0.1:3333
-```
+The listener is deliberately bound to the direct miner LAN, not loopback. There
+is no `127.0.0.1:3333` listener on this host.
 
 Current LAN endpoint (direct Ethernet from the S9i; the pool host is
 `10.42.0.1` on `10.42.0.0/24`):
