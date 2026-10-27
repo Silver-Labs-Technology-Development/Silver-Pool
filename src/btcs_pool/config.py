@@ -50,6 +50,26 @@ def _split_csv(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
 
 
+def _strip_ipv6_brackets(host: str) -> str:
+    value = (host or "").strip()
+    if value.startswith("[") and value.endswith("]"):
+        return value[1:-1]
+    return value
+
+
+def _format_host_port(host: str, port: int) -> str:
+    """Format a host and port for URLs and operator documentation.
+
+    Raw IPv6 literals need brackets in URLs. Accept either ``2001:db8::1`` or
+    ``[2001:db8::1]`` so an operator cannot accidentally double-bracket a
+    configured public host.
+    """
+    value = _strip_ipv6_brackets(host)
+    if ":" in value:
+        return f"[{value}]:{port}"
+    return f"{value}:{port}"
+
+
 @dataclass
 class PoolConfig:
     network: str = "regtest"
@@ -232,16 +252,15 @@ class PoolConfig:
 
     @property
     def public_stratum(self) -> dict:
-        configured = bool(self.public_stratum_host)
+        host = _strip_ipv6_brackets(self.public_stratum_host)
+        configured = bool(host)
+        endpoint = _format_host_port(host, self.public_stratum_port) if configured else None
         return {
             "configured": configured,
-            "host": self.public_stratum_host or None,
+            "host": host or None,
             "port": self.public_stratum_port,
-            "endpoint": (
-                f"{self.public_stratum_host}:{self.public_stratum_port}"
-                if configured
-                else None
-            ),
+            "endpoint": endpoint,
+            "url": f"stratum+tcp://{endpoint}" if endpoint else None,
             "password_required": bool(self.stratum_password),
         }
 

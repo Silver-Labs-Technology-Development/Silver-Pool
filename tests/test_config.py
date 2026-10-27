@@ -45,12 +45,28 @@ def test_environment_overrides(monkeypatch, tmp_path):
     assert config.auto_payouts is True
     assert config.public_stratum_host == "pool.example.net"
     assert config.public_stratum["endpoint"] == "pool.example.net:3456"
+    assert config.public_stratum["url"] == "stratum+tcp://pool.example.net:3456"
     assert config.public_stratum["password_required"] is True
     assert config.api_cors_origins == ["https://a.example", "https://b.example"]
     assert config.trusted_proxies == ["172.16.0.0/12", "10.0.0.0/8"]
     assert config.difficulty == 0.25
     assert config.extranonce2_size == 8
     assert config.db_path.endswith("db.sqlite3")
+
+
+def test_ipv6_public_endpoint_is_bracketed(monkeypatch):
+    monkeypatch.setenv("BTCS_PUBLIC_STRATUM_HOST", "2605:8d80:5b40:6451:a18d:8adc:7cd1:87c0")
+    monkeypatch.setenv("BTCS_PUBLIC_STRATUM_PORT", "3333")
+    config = PoolConfig.from_env()
+    public = config.public_stratum
+    assert public["host"] == "2605:8d80:5b40:6451:a18d:8adc:7cd1:87c0"
+    assert public["endpoint"] == "[2605:8d80:5b40:6451:a18d:8adc:7cd1:87c0]:3333"
+    assert public["url"] == "stratum+tcp://[2605:8d80:5b40:6451:a18d:8adc:7cd1:87c0]:3333"
+
+    monkeypatch.setenv("BTCS_PUBLIC_STRATUM_HOST", "[2605:8d80:5b40:6451:a18d:8adc:7cd1:87c0]")
+    config = PoolConfig.from_env()
+    assert config.public_stratum["endpoint"].count("[") == 1
+    assert config.public_stratum["endpoint"].endswith("]:3333")
 
 
 def test_default_ports_follow_network(monkeypatch):

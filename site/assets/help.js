@@ -19,6 +19,8 @@ function render(data) {
   const readyForMiners =
     node.connected && node.synced && live.listening && Boolean(live.current_job_id)
   const endpoint = stratum.endpoint
+  const ipv6Host = typeof stratum.host === 'string' && stratum.host.includes(':')
+  const ncHost = ipv6Host ? `-6 ${stratum.host}` : stratum.host
 
   setText('help-endpoint', endpoint || 'Not configured')
   setText(
@@ -48,7 +50,7 @@ function render(data) {
   setText(
     'help-command',
     endpoint
-      ? `nc -vz ${stratum.host} ${stratum.port}\n# or\ntelnet ${stratum.host} ${stratum.port}`
+      ? `nc -vz ${ncHost} ${stratum.port}\n# or\ntelnet ${stratum.host} ${stratum.port}`
       : 'The pool has not configured a public Stratum endpoint.\nDo not substitute a hostname from an old guide.',
   )
   initCopyButtons()

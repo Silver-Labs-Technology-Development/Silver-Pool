@@ -149,7 +149,8 @@ current job and a fresh template all pass. The website at
 ## Miner connection
 
 The website only advertises a public endpoint when `BTCS_PUBLIC_STRATUM_HOST`
-is non-empty. It is empty, so the site correctly says “Not configured.”
+is non-empty. It is empty, so the site correctly says “Not configured.” The
+listener is still reachable on private interfaces for a LAN test.
 
 Verified local endpoint (this host only):
 
@@ -161,22 +162,47 @@ Current LAN endpoint (tethered private address; subject to DHCP changes, use
 `ip -brief addr` to read the current value):
 
 ```text
-stratum+tcp://<private-lan-address>:3333
+stratum+tcp://172.20.10.13:3333
 ```
+
+The host LAN is `172.20.10.13/28` behind gateway `172.20.10.1`. The miner must
+be on the same LAN/hotspot, and client isolation must be disabled. Never use
+`127.0.0.1` on a separate miner: it points at the miner itself.
 
 Miner username format: `account` or `account.worker`. The account owns
-balances; the worker is the suffix after the final dot. The Stratum password
-is the value of `BTCS_STRATUM_PASSWORD` in `.env.native` (read it locally; do
-not paste it into a public page).
+balances; the worker is the suffix after the final dot. For the Antminer S9i
+test use:
 
-Example, using a SHA256d-capable miner:
-
-```sh
-miner -a sha256d \
-  -o stratum+tcp://127.0.0.1:3333 \
-  -u myaccount.rig1 \
-  -p '<BTCS_STRATUM_PASSWORD from .env.native>'
+```text
+account.s9i
 ```
+
+### HiveOS Flight Sheet (Antminer S9i)
+
+Use the SHA-256/SHA256d miner (`bmminer` on Antminer hardware) and plain TCP;
+this pool does not terminate TLS on Stratum.
+
+| HiveOS field | Value |
+|---|---|
+| Miner / algorithm | `bmminer` / SHA-256 (SHA256d) |
+| Pool URL | `stratum+tcp://172.20.10.13:3333` |
+| Wallet and worker template | `account.%WORKER_NAME%` |
+| Worker name | `s9i` |
+| Password | the `BTCS_STRATUM_PASSWORD` value from `.env.native` |
+
+That combination authorizes as `account.s9i`. If the HiveOS build presents one
+combined username field instead, enter `account.s9i` there directly.
+
+The Stratum password is the value of `BTCS_STRATUM_PASSWORD` in `.env.native`
+(read it locally; do not paste it into a public page). A temporary test password
+is currently configured for the LAN test. Replace it with a strong random value
+before any public Stratum exposure.
+
+The current production process passed a live password check: authorization with
+an intentionally invalid worker name reached worker validation, while a wrong
+password is rejected as `unauthorized`. The isolated authorization test also
+confirmed `account.s9i` receives a job. No production miner or share rows were
+created by these checks.
 
 The pool difficulty is static at `1.0`. That is suitable for SHA256d ASIC
 hardware; a CPU miner would need roughly 2^32 hashes per share and is not a
@@ -184,28 +210,34 @@ practical launch test. No third-party miner is installed on this host; the
 mainnet smoke uses a controlled protocol harness at a temporary, much easier
 test difficulty.
 
-## Public connectivity: not configured
+## Public connectivity: not enabled
 
 Current host facts:
 
-- LAN interface: tethered private address (check `ip -brief addr`; subject to
-  DHCP changes)
+- LAN interface: `172.20.10.13/28` (tethered private address; subject to DHCP
+  changes)
 - Public IPv4/IPv6: observed by the host but redacted from this public document
-- No inbound TCP forwarding, public DNS record, TLS certificate or public
-  hostname has been configured or verified
+- A temporary dual-stack probe on port `3334` accepted a real external IPv6
+  connection, so the network path is possible
+- Production port `3333` is bound IPv4-only (`0.0.0.0`) and has **not** been
+  externally verified
+- No public DNS record, TLS certificate or durable public hostname exists
 - Stratum is raw TCP; a Cloudflare Worker/Pages HTTP endpoint cannot proxy it
+- The current test password is intentionally not approved for public exposure
 
 Do **not** set `BTCS_PUBLIC_STRATUM_HOST` until a real external client can
-reach the endpoint. Passing a local `nc`/`curl` test is not external evidence.
-For a public launch you need one of:
+reach the endpoint and the password has been replaced. Passing a local
+`nc`/`curl` test is not external evidence. For a public launch you need one of:
 
 1. A public host/VPS with inbound TCP 3333 (or a chosen port) and a firewall
    rule limited to that port.
 2. A TCP relay/port-forward from the public host to this pool, plus a DNS name.
 3. A router/NAT port-forward and ISP that permits inbound TCP, plus a DNS name.
 
-The HTTP API/site can be exposed separately behind a TLS reverse proxy; that
-does not create a Stratum endpoint. RPC port 10567 must never be exposed.
+IPv6 literals must be bracketed in miner URLs, for example
+`stratum+tcp://[2001:db8::1]:3333`. The HTTP API/site can be exposed separately
+behind a TLS reverse proxy; that does not create a Stratum endpoint. RPC port
+10567 must never be exposed.
 
 ## Backup and restore
 

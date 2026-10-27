@@ -69,7 +69,12 @@ echo "website:  http://${SILVER_POOL_HTTP_BIND:-127.0.0.1}:${SILVER_POOL_HTTP_PO
 echo "stratum:  ${BTCS_STRATUM_HOST:-127.0.0.1}:${BTCS_STRATUM_PORT:-3333}"
 echo "payouts:  disabled (BTCS_AUTO_PAYOUTS=${BTCS_AUTO_PAYOUTS:-false})"
 if [ -n "${BTCS_PUBLIC_STRATUM_HOST:-}" ]; then
-    echo "public:   ${BTCS_PUBLIC_STRATUM_HOST}:${BTCS_PUBLIC_STRATUM_PORT:-3333} (external reachability is not verified)"
+    public_host=$BTCS_PUBLIC_STRATUM_HOST
+    case "$public_host" in
+        \[*\]) ;;
+        *:*) public_host="[$public_host]" ;;
+    esac
+    echo "public:   ${public_host}:${BTCS_PUBLIC_STRATUM_PORT:-3333} (external reachability is not verified)"
 else
     echo "public:   not configured"
 fi

@@ -55,8 +55,12 @@ independent security review. Labels follow the final readiness report:
 - [x] Unauthorized submit rejected as `not authorized`.
 - [x] Wrong Stratum password rejected as `unauthorized`.
 - [x] Reconnect after restart receives a fresh job; replay is rejected.
+- [x] LAN listener accepted a TCP connection and Stratum subscribe on
+      `172.20.10.13:3333`.
+- [x] Live production password check passed without creating a miner row; an
+      isolated auth test confirmed `account.s9i` receives a job.
 - [ ] Third-party miner application connected. None installed; only the
-      controlled protocol harness has connected.
+      controlled protocol harness and LAN probes have connected.
 - [ ] Public Stratum TCP reachability. No public host/port/DNS exists.
 - [ ] Firewall rule and port-forward approved. Not configured.
 
@@ -134,9 +138,11 @@ independent security review. Labels follow the final readiness report:
 ## I. External launch and payouts
 
 - [ ] Public Stratum endpoint verified from an external network. **Blocked:**
-      host is NAT/tethered; no inbound forwarding, public DNS or external test.
+      production `3333` is not externally verified, the current test password
+      must not be exposed, and no stable public DNS name exists. A temporary
+      IPv6 probe on `3334` did accept an external connection.
 - [ ] Third-party miner verified against a public endpoint. **Blocked:** no
-      endpoint and no miner binary installed.
+      public endpoint and no miner binary installed.
 - [ ] Public API/site with TLS. **Blocked:** no public host or reverse proxy.
 - [ ] Payout signing, broadcasting, confirmations, idempotency, operator
       authorization and recovery. **Not implemented; intentionally disabled.**
