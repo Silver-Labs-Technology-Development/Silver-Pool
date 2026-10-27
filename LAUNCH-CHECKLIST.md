@@ -56,9 +56,10 @@ independent security review. Labels follow the final readiness report:
 - [x] Wrong Stratum password rejected as `unauthorized`.
 - [x] Reconnect after restart receives a fresh job; replay is rejected.
 - [x] LAN listener accepted a TCP connection and Stratum subscribe on
-      `172.20.10.13:3333`.
+      `10.42.0.1:3333`.
 - [x] Live production password check passed without creating a miner row; an
-      isolated auth test confirmed `account.s9i` receives a job.
+      isolated auth test confirmed the selected S9i account/worker receives a
+      job.
 - [ ] Third-party miner application connected. None installed; only the
       controlled protocol harness and LAN probes have connected.
 - [ ] Public Stratum TCP reachability. No public host/port/DNS exists.

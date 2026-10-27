@@ -229,10 +229,11 @@ shows “Not configured”. This checkout does **not** configure a public endpoi
 because no external TCP path has been tested.
 
 At verification time the native deployment bound Stratum on
-`0.0.0.0:3333` for LAN access. The local endpoint was
-`stratum+tcp://127.0.0.1:3333`; the private LAN address is assigned by DHCP and
-is not published here. Neither is a public endpoint, and no third-party miner
-has connected.
+`10.42.0.1:3333` for the directly connected S9i LAN. The host-side loopback
+endpoint is no longer bound; miners on the direct LAN use
+`stratum+tcp://10.42.0.1:3333`. No public endpoint is configured, and no
+third-party miner had submitted an accepted share at the time of this
+verification.
 
 Miner usernames use `account` or `account.worker`. The account is the unit that
 owns balances; the worker is the suffix after the final dot. If

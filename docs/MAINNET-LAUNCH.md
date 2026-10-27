@@ -19,9 +19,9 @@ The pool runs as two systemd **user** services:
 - `silver-pool-web.service` — static site and `/api` reverse proxy
 
 The API and website bind to loopback. Stratum binds to the configured host;
-this host is currently configured with `0.0.0.0:3333` for LAN access, but no
-public port-forward, DNS name, TLS terminator or external reachability test
-exists.
+this host is currently configured with `10.42.0.1:3333` on the direct S9i LAN,
+with no public port-forward, DNS name, TLS terminator or external reachability
+test.
 
 ## What was verified on 2026-10-26
 
@@ -99,7 +99,7 @@ Copy `.env.native.example`; never commit `.env.native`. The important values:
 | `BTCS_POOL_ADDRESS` or `BTCS_POOL_SCRIPT_PUBKEY` | one valid mainnet output | The configured address/script is the coinbase destination |
 | `BTCS_POOL_FEE` | `2.0` | Accounting fee; no payout path |
 | `BTCS_AUTO_PAYOUTS` | `false` | Must remain false |
-| `BTCS_STRATUM_HOST` | `127.0.0.1` or `0.0.0.0` | `0.0.0.0` exposes Stratum on local interfaces |
+| `BTCS_STRATUM_HOST` | `127.0.0.1`, `10.42.0.1`, or `0.0.0.0` | Bind to the miner LAN interface; `0.0.0.0` exposes Stratum on every local IPv4 interface |
 | `BTCS_STRATUM_PORT` | `3333` | TCP, not HTTP |
 | `BTCS_STRATUM_PASSWORD` | long random value | Miners must use it; never publish it |
 | `BTCS_PUBLIC_STRATUM_HOST` | empty | Set only after an external TCP test |
@@ -158,24 +158,30 @@ Verified local endpoint (this host only):
 stratum+tcp://127.0.0.1:3333
 ```
 
-Current LAN endpoint (tethered private address; subject to DHCP changes, use
-`ip -brief addr` to read the current value):
+Current LAN endpoint (direct Ethernet from the S9i; the pool host is
+`10.42.0.1` on `10.42.0.0/24`):
 
 ```text
-stratum+tcp://172.20.10.13:3333
+stratum+tcp://10.42.0.1:3333
 ```
 
-The host LAN is `172.20.10.13/28` behind gateway `172.20.10.1`. The miner must
-be on the same LAN/hotspot, and client isolation must be disabled. Never use
-`127.0.0.1` on a separate miner: it points at the miner itself.
+The S9i is visible at `10.42.0.163` on that LAN and runs `bmminer` 30.0.1.3 as
+“Antminer S9 Hiveon”. Its pool 0 already uses the selected account/worker
+`bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t.s9`, but the URL is still the
+literal placeholder `stratum+tcp://<POOL_HOST>:3333`. Replace that placeholder
+with `stratum+tcp://10.42.0.1:3333`. Never use `127.0.0.1` on the miner: it
+points at the miner itself.
 
 Miner username format: `account` or `account.worker`. The account owns
 balances; the worker is the suffix after the final dot. For the Antminer S9i
-test use:
+test use the selected BTCS address as the account and `s9` as the worker:
 
 ```text
-account.s9i
+bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t.s9
 ```
+
+The current release does not use that address for automatic payouts; payouts
+remain disabled.
 
 ### HiveOS Flight Sheet (Antminer S9i)
 
@@ -185,13 +191,15 @@ this pool does not terminate TLS on Stratum.
 | HiveOS field | Value |
 |---|---|
 | Miner / algorithm | `bmminer` / SHA-256 (SHA256d) |
-| Pool URL | `stratum+tcp://172.20.10.13:3333` |
-| Wallet and worker template | `account.%WORKER_NAME%` |
-| Worker name | `s9i` |
+| Pool URL | `stratum+tcp://10.42.0.1:3333` |
+| Wallet and worker template | `%WALLET%.%WORKER_NAME%` |
+| Wallet / account | `bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t` |
+| Worker name | `s9` |
 | Password | the `BTCS_STRATUM_PASSWORD` value from `.env.native` |
 
-That combination authorizes as `account.s9i`. If the HiveOS build presents one
-combined username field instead, enter `account.s9i` there directly.
+That combination authorizes as
+`bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t.s9`. If the HiveOS build presents
+one combined username field instead, enter that full string there directly.
 
 The Stratum password is the value of `BTCS_STRATUM_PASSWORD` in `.env.native`
 (read it locally; do not paste it into a public page). A temporary test password
@@ -201,8 +209,8 @@ before any public Stratum exposure.
 The current production process passed a live password check: authorization with
 an intentionally invalid worker name reached worker validation, while a wrong
 password is rejected as `unauthorized`. The isolated authorization test also
-confirmed `account.s9i` receives a job. No production miner or share rows were
-created by these checks.
+confirmed the selected S9i account/worker receives a job. No production miner
+or share rows were created by these checks.
 
 The pool difficulty is static at `1.0`. That is suitable for SHA256d ASIC
 hardware; a CPU miner would need roughly 2^32 hashes per share and is not a
@@ -214,12 +222,12 @@ test difficulty.
 
 Current host facts:
 
-- LAN interface: `172.20.10.13/28` (tethered private address; subject to DHCP
-  changes)
+- LAN interface: `10.42.0.1/24` for the directly connected S9i; the tethered
+  uplink is DHCP-assigned and is not used by the miner
 - Public IPv4/IPv6: observed by the host but redacted from this public document
 - A temporary dual-stack probe on port `3334` accepted a real external IPv6
   connection, so the network path is possible
-- Production port `3333` is bound IPv4-only (`0.0.0.0`) and has **not** been
+- Production port `3333` is bound only to `10.42.0.1` and has **not** been
   externally verified
 - No public DNS record, TLS certificate or durable public hostname exists
 - Stratum is raw TCP; a Cloudflare Worker/Pages HTTP endpoint cannot proxy it
@@ -286,9 +294,9 @@ reinstall, and restore the backup only if accounting data is affected.
 - Node RPC: loopback `127.0.0.1:10567`, authenticated; never publish it.
 - API: loopback `127.0.0.1:8765`; read-only, no admin or payout endpoint.
 - Website: loopback `127.0.0.1:8080`; proxies `/api` only.
-- Stratum: `0.0.0.0:3333` in the current ignored env; reachable on local
-  interfaces, not externally verified. Add a firewall rule before any public
-  forwarding and restrict it to the intended port.
+- Stratum: `10.42.0.1:3333` in the current ignored env; reachable only on the
+  direct miner LAN, not externally verified. Add a firewall rule before any
+  public forwarding and restrict it to the intended port.
 - Payouts: disabled in config, API, database state and operator tooling.
 - Secrets: `.env.native` mode 600 and Git-ignored; systemd reads it directly.
 - Service hardening: `NoNewPrivileges`, `PrivateTmp`, `ProtectSystem=strict`,

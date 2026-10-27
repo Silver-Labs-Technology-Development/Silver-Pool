@@ -66,9 +66,9 @@ comment. The minimum launch values are:
 - `BTCS_STRATUM_PASSWORD` (long random value)
 - `BTCS_POOL_DB=data/mainnet/pool.sqlite3`
 
-The current host uses `BTCS_STRATUM_HOST=0.0.0.0` for LAN access. That is not a
-public endpoint and is not advertised by the API/site because
-`BTCS_PUBLIC_STRATUM_HOST` is empty.
+The current host uses `BTCS_STRATUM_HOST=10.42.0.1` to restrict Stratum to the
+direct S9i LAN. That is not a public endpoint and is not advertised by the
+API/site because `BTCS_PUBLIC_STRATUM_HOST` is empty.
 
 ## Verification boundary
 
