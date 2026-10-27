@@ -162,11 +162,12 @@ stratum+tcp://10.42.0.1:3333
 ```
 
 The S9i is visible at `10.42.0.163` on that LAN and runs `bmminer` 30.0.1.3 as
-“Antminer S9 Hiveon”. Its pool 0 already uses the selected account/worker
-`bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t.s9`, but the URL is still the
-literal placeholder `stratum+tcp://<POOL_HOST>:3333`. Replace that placeholder
-with `stratum+tcp://10.42.0.1:3333`. Never use `127.0.0.1` on the miner: it
-points at the miner itself.
+“Antminer S9 Hiveon”. Its pool 0 now uses the selected account/worker
+`bs1quhrcl6k95gk9llzewnl5aq78u8txrpkt6ea20t.s9` and the correct URL
+`stratum+tcp://10.42.0.1:3333`. Pool 0 is still inactive, however: the miner is
+mining on Hiveon's fallback pool and has not opened a connection to Silver Pool.
+Activate the first pool in the miner configuration or reboot the miner after
+saving it. Never use `127.0.0.1` on the miner: it points at the miner itself.
 
 Miner username format: `account` or `account.worker`. The account owns
 balances; the worker is the suffix after the final dot. For the Antminer S9i

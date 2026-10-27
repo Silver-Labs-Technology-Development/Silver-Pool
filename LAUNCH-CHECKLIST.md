@@ -60,6 +60,8 @@ independent security review. Labels follow the final readiness report:
 - [x] Live production password check passed without creating a miner row; an
       isolated auth test confirmed the selected S9i account/worker receives a
       job.
+- [x] S9i pool 0 configured with the LAN URL and selected worker. Pool 0 is not
+      yet activated; the miner remains on its Hiveon fallback pool.
 - [ ] Third-party miner application connected. None installed; only the
       controlled protocol harness and LAN probes have connected.
 - [ ] Public Stratum TCP reachability. No public host/port/DNS exists.
