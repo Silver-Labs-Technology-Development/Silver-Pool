@@ -1,0 +1,16 @@
+# Silver Pool frontend on the existing Cloudflare Worker.
+# Build with `npm run build`, then deploy with:
+#   npx wrangler deploy --config wrangler.worker.toml
+#
+# Only the static site is uploaded. The API, Stratum listener and BTCS node
+# stay on the local server. Configure VITE_API_BASE_URL with the public HTTPS
+# backend /api URL when that endpoint is ready; absent it, the UI stays offline.
+# The optional Pages deployment configuration remains in wrangler.toml.
+
+name = "silver-pool"
+compatibility_date = "2026-10-24"
+
+[assets]
+directory = "./site/_site"
+html_handling = "auto-trailing-slash"
+not_found_handling = "none"
