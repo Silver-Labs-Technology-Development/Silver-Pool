@@ -12,6 +12,10 @@ name = "silver-pool"
 compatibility_date = "2026-10-24"
 main = "./edge/worker.mjs"
 
+# Keep public hosting off while the complete local launch build is prepared.
+workers_dev = false
+preview_urls = false
+
 # Deliberately empty: the private portal returns 404 until all three values
 # match an owner-only Cloudflare Access application. Never put a default owner
 # here. See docs/ADMIN-ACCESS.md before enabling this portal.
