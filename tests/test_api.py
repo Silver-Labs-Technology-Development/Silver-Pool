@@ -229,7 +229,7 @@ def test_ready_success_and_failure_envelopes(tmp_path):
                 assert payload["ok"] is True
                 assert payload["data"]["ready"] is False
                 assert payload["data"]["node"]["connected"] is False
-                assert "connection refused" in payload["data"]["node"]["error"]
+                assert payload["data"]["node"]["error"] == "Node RPC unavailable"
 
     asyncio.run(run())
 
@@ -248,7 +248,7 @@ def test_health_degrades_but_stays_liveness_200(tmp_path, monkeypatch):
                 payload = await response.json()
                 assert payload["data"]["status"] == "degraded"
                 assert payload["data"]["database"]["healthy"] is False
-                assert "database file is unavailable" in payload["data"]["database"]["error"]
+                assert payload["data"]["database"]["error"] == "Database unavailable"
 
             async with client.get("/api/ready") as response:
                 assert response.status == 503

@@ -163,7 +163,8 @@ def _db_healthy(db: Database) -> tuple[bool, str | None]:
         db.fetchone("SELECT 1 AS ok")
         return True, None
     except Exception as exc:  # noqa: BLE001
-        return False, str(exc)
+        log.warning("database_health_failed error=%s", exc)
+        return False, "Database unavailable"
 
 
 class Api:
@@ -320,10 +321,18 @@ class Api:
         snapshot = await self.node_monitor.snapshot()
         return snapshot.to_dict()
 
+    def _stratum_data(self) -> dict:
+        data = dict(self.stratum_status())
+        # The Stratum service logs the detailed failure privately. Never
+        # forward its upstream RPC exception text to public visitors.
+        if data.get("last_template_error"):
+            data["last_template_error"] = "Node template unavailable"
+        return data
+
     async def _checks(self) -> dict:
         db_ok, db_error = await asyncio.to_thread(_db_healthy, self.db)
         node = await self._node_data()
-        stratum = self.stratum_status()
+        stratum = self._stratum_data()
         stratum_running = bool(stratum.get("listening"))
         template_fresh = False
         last_template = stratum.get("last_template_at")
@@ -398,7 +407,7 @@ class Api:
                 "ready": checks["ready"],
                 "checks": checks,
                 "node": node,
-                "stratum": self.stratum_status(),
+                "stratum": self._stratum_data(),
                 "pool": stats,
                 "database": {"healthy": checks["database"]["healthy"]},
                 "timestamp": time.time(),
@@ -426,7 +435,7 @@ class Api:
                 "recent_shares": shares,
                 "round": round_row,
                 "node": node,
-                "stratum": self.stratum_status(),
+                "stratum": self._stratum_data(),
                 "config": _public_config(self.config),
             },
         )

@@ -19,7 +19,8 @@ export default {
   // hosted under a repository subpath instead of a dedicated hostname.
   base: process.env.SITE_BASE || '/',
   root: '.',
-  publicDir: false,
+  // Includes Cloudflare's _headers rules in the deployment output.
+  publicDir: 'public',
   build: {
     outDir: '_site',
     emptyOutDir: true,

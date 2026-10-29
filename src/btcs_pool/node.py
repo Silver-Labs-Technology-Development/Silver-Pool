@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from dataclasses import dataclass
 
 from .rpc import BTCSRpc, RPCError
+
+log = logging.getLogger(__name__)
+
+PUBLIC_NODE_ERROR = "Node RPC unavailable"
 
 
 @dataclass
@@ -45,7 +50,9 @@ class NodeSnapshot:
             "difficulty": self.difficulty,
             "mempool_transactions": self.mempool_transactions,
             "warnings": self.warnings,
-            "error": self.error,
+            # RPC errors may contain response bodies, credentials or local
+            # paths. The snapshot is serialized by the public HTTP API.
+            "error": PUBLIC_NODE_ERROR if self.error else None,
             "checked_at": self.checked_at,
         }
 
@@ -85,6 +92,7 @@ class NodeMonitor:
                 checked_at=checked_at,
             )
         except (RPCError, OSError, ValueError) as exc:
+            log.warning("node_rpc_unavailable error=%s", exc)
             return NodeSnapshot(
                 connected=False,
                 network=self.network,

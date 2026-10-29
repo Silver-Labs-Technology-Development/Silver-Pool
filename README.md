@@ -1,5 +1,28 @@
 # Silver Pool
 
+## Current test build
+
+The public frontend is deployed on Cloudflare Workers with
+`wrangler.worker.toml`. The Python API, Stratum service and coin nodes run
+separately. The public site contains no Admin tab or private administration
+assets. The new owner-only `/admin/` portal verifies a Cloudflare Access JWT
+on the server and returns `404` for everyone until the owner identity and
+Access application are configured. It is read-only and has no wallet or node
+controls. See [`docs/ADMIN-ACCESS.md`](docs/ADMIN-ACCESS.md).
+
+Disabled, isolated regtest planning profiles are available for BTCS, BTC, BCH,
+LTC and DOGE. Only BTCS has an existing pool backend; the additional coins are
+not integrated. `python3 scripts/coins.py validate` checks the profiles without
+downloading software, starting services or creating chain data. The operator
+must select the coins and storage drive before downloads. See
+[`docs/MULTICOIN-TESTING.md`](docs/MULTICOIN-TESTING.md).
+
+Run `npm run test:edge` for the private portal boundary tests and
+`python3 -m pytest -q tests` for the backend, accounting and coin profile tests.
+The installed BTCS daemon enables a separate throwaway regtest end-to-end test.
+Test coins and node installation do not produce real revenue. Payouts remain
+disabled.
+
 ## Multi-Coin Positioning
 
 **Headline:**\
@@ -63,7 +86,7 @@ deployment and a Docker Compose stack.
 >
 > Public Stratum connectivity, a third-party miner test, public TLS hosting and
 > payouts are **not** verified or implemented. No public endpoint is advertised.
-> The static frontend on GitHub Pages serves no API or Stratum service, so it
+> The public Cloudflare frontend serves no API or Stratum service, so it
 > shows explicit offline states. See
 > [`docs/MAINNET-LAUNCH.md`](docs/MAINNET-LAUNCH.md) for the runbook and
 > [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md) for the open gates.

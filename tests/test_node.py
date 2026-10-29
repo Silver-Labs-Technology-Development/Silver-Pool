@@ -91,7 +91,7 @@ def test_node_rpc_failure_is_reported_not_raised():
         assert snapshot.connected is False
         assert snapshot.synced is False
         assert "connection refused" in snapshot.error
-        assert snapshot.to_dict()["error"] == snapshot.error
+        assert snapshot.to_dict()["error"] == "Node RPC unavailable"
         assert await monitor_hash(rpc) is None
 
     async def monitor_hash(rpc):

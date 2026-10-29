@@ -51,6 +51,9 @@ jobs:
         run: npm run test:browser
       - name: Production multi-page build
         run: npm run build
+      - name: Private administration boundary tests
+        working-directory: .
+        run: npm run test:edge
 
   compose:
     runs-on: ubuntu-latest

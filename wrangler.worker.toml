@@ -2,15 +2,30 @@
 # Build with `npm run build`, then deploy with:
 #   npx wrangler deploy --config wrangler.worker.toml
 #
-# Only the static site is uploaded. The API, Stratum listener and BTCS node
-# stay on the local server. Configure VITE_API_BASE_URL with the public HTTPS
+# Deploys the static site and the private owner-access gate. The pool API,
+# Stratum listener and BTCS node stay on the local server.
+# Configure VITE_API_BASE_URL with the public HTTPS
 # backend /api URL when that endpoint is ready; absent it, the UI stays offline.
 # The optional Pages deployment configuration remains in wrangler.toml.
 
 name = "silver-pool"
 compatibility_date = "2026-10-24"
+main = "./edge/worker.mjs"
+
+# Deliberately empty: the private portal returns 404 until all three values
+# match an owner-only Cloudflare Access application. Never put a default owner
+# here. See docs/ADMIN-ACCESS.md before enabling this portal.
+[vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
+ADMIN_OWNER_EMAIL = ""
 
 [assets]
 directory = "./site/_site"
+binding = "ASSETS"
 html_handling = "auto-trailing-slash"
 not_found_handling = "none"
+# Authentication always runs before static assets on reserved private paths.
+# Encoded paths also go through the Worker and are rejected, not normalized
+# into private documents. Other public files retain asset-first serving.
+run_worker_first = ["/admin*", "/api/admin*", "/*%*"]

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "mode": "test-only",
+  "coins": [
+    {
+      "id": "btcs",
+      "name": "Bitcoin Silver",
+      "algorithm": "sha256d",
+      "daemon": "bitcoinsilverd",
+      "config_filename": "bitcoinsilver.conf",
+      "source_url": "https://github.com/bitcoin-silver/core",
+      "description": "The existing backend implements BTCS SHA256d only. This separate profile is disabled staging and does not reconfigure any existing node or pool.",
+      "pool_adapter": "existing-btcs-sha256d",
+      "download_enabled": false,
+      "node_start_enabled": false,
+      "pool_start_enabled": false,
+      "explorer_enabled": false,
+      "payouts_enabled": false,
+      "regtest": {
+        "ports": {"rpc": 19443, "p2p": 19444, "api": 19465, "stratum": 19433},
+        "expected_genesis_hash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+        "genesis_source_url": "https://github.com/bitcoin-silver/core/blob/master/src/kernel/chainparams.cpp"
+      }
+    },
+    {
+      "id": "btc",
+      "name": "Bitcoin",
+      "algorithm": "sha256d",
+      "daemon": "bitcoind",
+      "config_filename": "bitcoin.conf",
+      "source_url": "https://github.com/bitcoin/bitcoin",
+      "description": "Disabled candidate. SHA256d is the closest algorithm to the current backend, but the Bitcoin node and complete pool adapter have not been integrated or tested here.",
+      "pool_adapter": null,
+      "download_enabled": false,
+      "node_start_enabled": false,
+      "pool_start_enabled": false,
+      "explorer_enabled": false,
+      "payouts_enabled": false,
+      "regtest": {
+        "ports": {"rpc": 20443, "p2p": 20444, "api": 20465, "stratum": 20433},
+        "expected_genesis_hash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+        "genesis_source_url": "https://github.com/bitcoin/bitcoin/blob/v30.0/src/kernel/chainparams.cpp"
+      }
+    },
+    {
+      "id": "bch",
+      "name": "Bitcoin Cash",
+      "algorithm": "sha256d",
+      "daemon": "bitcoind",
+      "config_filename": "bitcoin.conf",
+      "source_url": "https://github.com/bitcoin-cash-node/bitcoin-cash-node",
+      "description": "Disabled candidate. Shares a hash algorithm with BTC/BTCS but has different consensus/template behavior; no Bitcoin Cash pool adapter is implemented.",
+      "pool_adapter": null,
+      "download_enabled": false,
+      "node_start_enabled": false,
+      "pool_start_enabled": false,
+      "explorer_enabled": false,
+      "payouts_enabled": false,
+      "regtest": {
+        "ports": {"rpc": 21443, "p2p": 21444, "api": 21465, "stratum": 21433},
+        "expected_genesis_hash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+        "genesis_source_url": "https://github.com/bitcoin-cash-node/bitcoin-cash-node/blob/v28.0.1/src/chainparams.cpp"
+      }
+    },
+    {
+      "id": "ltc",
+      "name": "Litecoin",
+      "algorithm": "scrypt",
+      "daemon": "litecoind",
+      "config_filename": "litecoin.conf",
+      "source_url": "https://github.com/litecoin-project/litecoin",
+      "description": "Disabled candidate. Needs Scrypt share verification and Litecoin block/template tests; a SHA256d-only miner cannot perform Scrypt mining.",
+      "pool_adapter": null,
+      "download_enabled": false,
+      "node_start_enabled": false,
+      "pool_start_enabled": false,
+      "explorer_enabled": false,
+      "payouts_enabled": false,
+      "regtest": {
+        "ports": {"rpc": 22443, "p2p": 22444, "api": 22465, "stratum": 22433},
+        "expected_genesis_hash": "530827f38f93b43ed12af0b3ad25a288dc02ed74d6d7857862df51fc56c416f9",
+        "genesis_source_url": "https://github.com/litecoin-project/litecoin/blob/v0.21.4/src/chainparams.cpp"
+      }
+    },
+    {
+      "id": "doge",
+      "name": "Dogecoin",
+      "algorithm": "scrypt-auxpow",
+      "daemon": "dogecoind",
+      "config_filename": "dogecoin.conf",
+      "source_url": "https://github.com/dogecoin/dogecoin",
+      "description": "Disabled candidate. Requires Scrypt and AuxPoW/merged-mining integration with separate accounting. No Dogecoin pool, merged mining or explorer is implemented.",
+      "pool_adapter": null,
+      "download_enabled": false,
+      "node_start_enabled": false,
+      "pool_start_enabled": false,
+      "explorer_enabled": false,
+      "payouts_enabled": false,
+      "regtest": {
+        "ports": {"rpc": 23443, "p2p": 23444, "api": 23465, "stratum": 23433},
+        "expected_genesis_hash": "3d2160a3b5dc4a9d62e7e66a295f70313ac808440ef7400d6c0772171ce973a5",
+        "genesis_source_url": "https://github.com/dogecoin/dogecoin/blob/v1.14.9/src/chainparams.cpp"
+      }
+    }
+  ]
+}

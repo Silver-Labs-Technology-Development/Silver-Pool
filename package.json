@@ -8,6 +8,7 @@
     "site:build": "cd site && npm run build",
     "site:test": "cd site && npm test",
     "site:test:browser": "cd site && npm run test:browser",
+    "test:edge": "node --test edge/tests/admin-access.test.mjs",
     "test": "python3 -m pytest -q tests",
     "deploy:site": "wrangler pages deploy site/_site --project-name silver-pool"
   },
