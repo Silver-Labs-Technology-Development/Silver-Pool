@@ -124,7 +124,7 @@ def test_stratum_probe_never_authorizes_or_submits():
         def __init__(self):
             self.messages = []
             self.reply = (
-                b'{"id":1,"result":[[["mining.notify","notify"]],"1234",4],"error":null}\\n'
+                b'{"id":1,"result":[[["mining.notify","notify"]],"1234",4],"error":null}\n'
             )
 
         def __enter__(self):
