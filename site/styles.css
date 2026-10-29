@@ -368,3 +368,42 @@ td .mono { font-size: 0.82rem; }
 
 .badge-stale, .badge-submitted { background: #f2f3f4; color: #5f6871; border-color: #d7dce0; }
 .badge-confirmed { background: var(--green-soft); color: var(--green); border-color: #bfe4cc; }
+
+/* SILVER LABS OCT 2026 — BLUE/SILVER VISUAL STANDARD
+   Review branch: styling only. Does not change mining, finance or services.
+   Shared identity: midnight navy, luminous icy blue, silver surfaces. */
+:root{
+  color-scheme:dark;
+  --ink:#e8f3ff;--ink-soft:#bdcfe0;--muted:#9cb7ce;
+  --line:#365572;--paper:#102238;--white:#142a41;
+  --charcoal:#091729;--charcoal-2:#14293e;
+  --silver:#d5e9fa;--silver-2:#213d58;
+  --accent:#91d4ff;--accent-dark:#bae7ff;
+  --gold:#79c5ff;--gold-light:#9ddbff;
+  --green:#75d6b3;--green-soft:#154132;
+  --amber:#f0c988;--amber-soft:#423925;
+  --red:#ffaaa9;--red-soft:#452932;
+  --shadow:0 12px 30px #07132444;
+}
+body{background:#0c1c30;color:var(--ink)}
+.site-header{background:rgba(9,22,38,.97);border-bottom-color:#31546f}
+.brand-mark{background:linear-gradient(145deg,#e7f7ff,#86c5f3);color:#0a2037}
+.brand-name span{color:#9bdcff}
+.primary-navigation a.is-active{box-shadow:inset 0 -2px 0 #91d4ff}
+.hero,.page-hero{background:radial-gradient(circle at 82% 18%,#4b9fe030,transparent 40%),linear-gradient(135deg,#091827,#173b5c)!important;border-bottom-color:#315370}
+.hero h1 span{color:#9bdcff}.eyebrow,.hero .eyebrow{color:#9bdcff}
+.button-primary{background:#9bdcff;border-color:#9bdcff;color:#092137}
+.button-primary:hover{background:#c4eaff;color:#092137}
+.button-dark{background:#203c57;color:#eaf5ff;border-color:#496780}
+.panel,.stat-card,.state-panel{background:var(--white);border-color:var(--line);color:var(--ink)}
+.stat-card .label,.stat-card .detail,.panel .muted{color:var(--muted)}
+.section-alt{background:var(--paper);border-color:var(--line)}
+.panel-dark{background:#102032;border-color:#416077}
+.state-error{background:#462e38;border-color:#8a4d5a}
+.state-offline{background:#423c30;border-color:#8e7550}
+.state-loading{background:#193c58;border-color:#4f7c9c}
+.state-ok{background:#153f38;border-color:#397e69}
+code{background:#1b3953;border-color:var(--line);color:#e8f6ff}
+table,th,td{border-color:var(--line)}
+a{color:var(--accent)}a:hover{color:var(--accent-dark)}
+:focus-visible{outline-color:#a6dcff}
